@@ -32,22 +32,6 @@
     </div>
   }
 
-  <!-- Template Info (shown when template is loaded) -->
-  @if (templateName()) {
-    <div class="template-info-bar">
-      <div class="template-info-content">
-        <div class="template-info-header">
-          <span class="template-info-icon">📋</span>
-          <span class="template-info-name">{{ templateName() }}</span>
-        </div>
-        @if (templateDescription()) {
-          <p class="template-info-description">{{ templateDescription() }}</p>
-        }
-      </div>
-      <button class="template-info-close" (click)="clearTemplateInfo()" title="Clear template info">✕</button>
-    </div>
-  }
-
   <!-- Template Title -->
   <div class="template-title-section">
     <input
