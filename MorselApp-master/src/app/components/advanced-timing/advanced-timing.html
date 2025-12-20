@@ -4,7 +4,6 @@
     <div class="header-title">
       <span class="header-icon">⏱</span>
       <span>Advanced Timing</span>
-      <span class="header-arabic">إعدادات التوقيت المتقدمة</span>
     </div>
     <span class="expand-icon">{{ isExpanded ? '▲' : '▼' }}</span>
   </div>
@@ -16,11 +15,10 @@
         <h4 class="section-title">
           <span class="section-icon">⏳</span>
           Message Delays
-          <span class="section-arabic">التأخير بين الرسائل</span>
         </h4>
         <div class="inputs-row">
           <div class="input-group">
-            <label>Min (الحد الأدنى) - Min 30</label>
+            <label>Min Delay - Min 30</label>
             <div class="input-with-unit">
               <input
                 type="number"
@@ -28,12 +26,12 @@
                 (input)="updateDelayMin($any($event.target).valueAsNumber)"
                 min="30"
               />
-              <span class="unit">ثانية</span>
+              <span class="unit">sec</span>
             </div>
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max (الحد الأقصى)</label>
+            <label>Max Delay</label>
             <div class="input-with-unit">
               <input
                 type="number"
@@ -41,13 +39,13 @@
                 (input)="updateDelayMax($any($event.target).valueAsNumber)"
                 min="30"
               />
-              <span class="unit">ثانية</span>
+              <span class="unit">sec</span>
             </div>
           </div>
         </div>
         <div class="info-box">
           <span class="info-icon">ℹ</span>
-          التأخير العشوائي بين كل رسالة (الحد الأدنى 30 ثانية)
+          Random delay between each message (minimum 30 seconds)
         </div>
       </div>
 
@@ -56,42 +54,42 @@
         <h4 class="section-title">
           <span class="section-icon">💬</span>
           Random Breaks
-          <span class="section-arabic">فترات الراحة العشوائية</span>
           <span class="always-on-badge">Always On</span>
         </h4>
 
         <div class="inputs-row">
           <div class="input-group">
-            <label>Min (عدد الرسائل)</label>
+            <label>Min Messages</label>
             <div class="input-with-unit">
               <input
                 type="number"
                 [value]="timing().messagesCountMin"
                 (input)="updateMessagesMin($any($event.target).valueAsNumber)"
                 min="1"
+                max="20"
               />
-              <span class="unit">رسالة</span>
+              <span class="unit">msgs</span>
             </div>
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max (عدد الرسائل) - Max 35</label>
+            <label>Max Messages - Max 20</label>
             <div class="input-with-unit">
               <input
                 type="number"
                 [value]="timing().messagesCountMax"
                 (input)="updateMessagesMax($any($event.target).valueAsNumber)"
                 min="1"
-                max="35"
+                max="20"
               />
-              <span class="unit">رسالة</span>
+              <span class="unit">msgs</span>
             </div>
           </div>
         </div>
 
         <div class="inputs-row">
           <div class="input-group">
-            <label>Min (مدة الراحة) - Min 3</label>
+            <label>Min Duration - Min 3</label>
             <div class="input-with-unit">
               <input
                 type="number"
@@ -99,12 +97,12 @@
                 (input)="updateBreakMin($any($event.target).valueAsNumber)"
                 min="3"
               />
-              <span class="unit">دقيقة</span>
+              <span class="unit">min</span>
             </div>
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max (مدة الراحة)</label>
+            <label>Max Duration</label>
             <div class="input-with-unit">
               <input
                 type="number"
@@ -112,58 +110,17 @@
                 (input)="updateBreakMax($any($event.target).valueAsNumber)"
                 min="3"
               />
-              <span class="unit">دقيقة</span>
+              <span class="unit">min</span>
             </div>
           </div>
         </div>
 
         <div class="info-box">
           <span class="info-icon">ℹ</span>
-          توقف عشوائي بعد عدد من الرسائل (الحد الأقصى 35 رسالة)
+          Random pause after a number of messages (maximum 20 messages)
         </div>
       </div>
 
-      <!-- Advanced Options (Always Enabled) -->
-      <div class="timing-section">
-        <h4 class="section-title">
-          <span class="section-icon">⚙️</span>
-          Decimal Random
-          <span class="section-arabic">عشوائية عشرية</span>
-          <span class="always-on-badge">Always On</span>
-        </h4>
-
-        <div class="precision-row">
-          <div class="precision-select">
-            <label>Precision (الدقة)</label>
-            <select
-              [value]="timing().precision"
-              (change)="updatePrecision($any($event.target).value)"
-            >
-              @for (opt of precisionOptions; track opt) {
-                <option [value]="opt">{{ opt }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="info-box">
-          <span class="info-icon">ℹ</span>
-          توليد أرقام عشوائية حقيقية غير متوقعة (مثال: 32.7 بدلاً من 32 أو 33)
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button class="btn btn-primary" (click)="saveSettings()">
-          💾 حفظ الإعدادات
-        </button>
-        <button class="btn btn-outline" (click)="resetSettings()">
-          🔄 إعادة تعيين
-        </button>
-        <button class="btn btn-outline" (click)="refreshSettings()">
-          🔃 تحديث
-        </button>
-      </div>
     </div>
   }
 </div>

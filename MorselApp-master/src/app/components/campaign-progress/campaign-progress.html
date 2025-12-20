@@ -30,7 +30,7 @@
       <span class="browser-status-badge" [class]="browserStatusClass">{{ browserStatusText }}</span>
     </div>
 
-    <!-- Browser Selection -->
+    <!-- Browser Selection - Chrome Only -->
     <div class="browser-selection">
       <label class="browser-option">
         <input
@@ -44,20 +44,6 @@
         <span class="browser-label">
           <span class="browser-icon">C</span>
           Chrome
-        </span>
-      </label>
-      <label class="browser-option">
-        <input
-          type="radio"
-          name="browserType"
-          value="Firefox"
-          [checked]="selectedBrowser() === 'Firefox'"
-          (change)="setBrowserType('Firefox')"
-          [disabled]="isBrowserOpen() || isInitializingBrowser()"
-        />
-        <span class="browser-label">
-          <span class="browser-icon">F</span>
-          Firefox
         </span>
       </label>
     </div>
@@ -183,13 +169,13 @@
         </div>
       </div>
 
-      <!-- Stats Grid -->
+      <!-- Stats Grid - Enhanced In Progress -->
       <div class="stats-grid">
-        <div class="stat-item sent">
-          <span class="stat-icon">OK</span>
+        <div class="stat-item in-progress enhanced">
+          <span class="stat-icon">▶</span>
           <div class="stat-info">
-            <span class="stat-value">{{ progress().sent }}</span>
-            <span class="stat-label">SENT</span>
+            <span class="stat-value">{{ progress().inProgress }}</span>
+            <span class="stat-label">IN PROGRESS</span>
           </div>
         </div>
         <div class="stat-item delivered">
@@ -252,16 +238,16 @@
       <span class="bottom-value green">{{ progress().sent }}</span>
     </div>
     <div class="bottom-stat">
+      <span class="bottom-label">IN PROGRESS</span>
+      <span class="bottom-value blue">{{ progress().inProgress }}</span>
+    </div>
+    <div class="bottom-stat">
       <span class="bottom-label">FAILED</span>
       <span class="bottom-value red">{{ progress().failed }}</span>
     </div>
     <div class="bottom-stat">
       <span class="bottom-label">REMAINING</span>
       <span class="bottom-value orange">{{ isRunning() || isPaused() ? progress().remaining : selectedCount() }}</span>
-    </div>
-    <div class="bottom-stat">
-      <span class="bottom-label">IN PROGRESS</span>
-      <span class="bottom-value blue">{{ progress().inProgress }}</span>
     </div>
   </div>
 </div>
