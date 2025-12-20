@@ -535,6 +535,11 @@
   font-weight: 600;
 }
 
+.stat-item.selected .stat-icon {
+  background: #ccfbf1;
+  color: #20b2aa;
+}
+
 .stat-item.in-progress .stat-icon {
   background: #dbeafe;
   color: #3b82f6;
