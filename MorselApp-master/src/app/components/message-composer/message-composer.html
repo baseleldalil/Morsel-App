@@ -1,13 +1,9 @@
 <div class="message-composer">
-  <!-- Variables Bar -->
+  <!-- Variables Bar - Sticky at top for Arabic & English Name -->
   <div class="variables-bar">
     <span class="variables-label">Variables:</span>
     <button class="var-btn" (click)="insertVariable('arabicName')">👤 Arabic Name</button>
     <button class="var-btn" (click)="insertVariable('englishName')">👤 English Name</button>
-    <button class="var-btn add-btn">➕</button>
-    <div class="emoji-section">
-      <button class="emoji-btn" (click)="toggleEmojiPicker()">😊 Emojis</button>
-    </div>
   </div>
 
   <!-- Emoji Picker -->
@@ -52,7 +48,7 @@
     </div>
   }
 
-  <!-- Template Title & Description -->
+  <!-- Template Title -->
   <div class="template-title-section">
     <input
       type="text"
@@ -60,13 +56,6 @@
       placeholder="Enter template title..."
       [value]="templateName()"
       (input)="onTemplateTitleChange($any($event.target).value)"
-    />
-    <input
-      type="text"
-      class="template-description-input"
-      placeholder="Enter template description (optional)..."
-      [value]="templateDescription()"
-      (input)="onTemplateDescriptionChange($any($event.target).value)"
     />
   </div>
 
