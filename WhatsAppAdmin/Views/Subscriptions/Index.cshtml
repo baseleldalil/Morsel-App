@@ -1,0 +1,115 @@
+@model IEnumerable<Subscription>
+
+@{
+    ViewData["Title"] = "Subscriptions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Manage Subscriptions</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Create New Subscription
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Max Messages/Day</th>
+                            <th>Permissions</th>
+                            <th>Timer Settings</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var subscription in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@subscription.Name</strong>
+                                    @if (!string.IsNullOrEmpty(subscription.Description))
+                                    {
+                                        <br><small class="text-muted">@subscription.Description</small>
+                                    }
+                                </td>
+                                <td>$@subscription.Price.ToString("F2")</td>
+                                <td>
+                                    <span class="badge bg-info">@subscription.MaxMessagesPerDay</span>
+                                </td>
+                                <td>
+                                    @if (subscription.SubscriptionPermissions.Any())
+                                    {
+                                        @foreach (var sp in subscription.SubscriptionPermissions.Take(3))
+                                        {
+                                            <span class="badge bg-secondary me-1">@sp.Permission.Name</span>
+                                        }
+                                        @if (subscription.SubscriptionPermissions.Count() > 3)
+                                        {
+                                            <span class="badge bg-light text-dark">+@(subscription.SubscriptionPermissions.Count() - 3) more</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No permissions</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (subscription.TimerSettings != null)
+                                    {
+                                        <small>
+                                            Min: @(subscription.TimerSettings.MinDelaySeconds?.ToString() ?? "N/A")s<br>
+                                            Max: @(subscription.TimerSettings.MaxDelaySeconds?.ToString() ?? "N/A")s
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No timer</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (subscription.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@subscription.Id" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@subscription.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@subscription.Id" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-card-list text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">No subscriptions found</h4>
+                <p class="text-muted">Create your first subscription to get started.</p>
+                <a asp-action="Create" class="btn btn-primary">Create Subscription</a>
+            </div>
+        }
+    </div>
+</div>

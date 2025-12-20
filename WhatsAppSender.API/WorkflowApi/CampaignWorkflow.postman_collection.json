@@ -1,0 +1,271 @@
+{
+  "info": {
+    "name": "Campaign Workflow API",
+    "description": "API collection for campaign workflow operations: Start, Pause, Stop",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:5001/api",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "YOUR_API_KEY_HERE",
+      "type": "string"
+    },
+    {
+      "key": "campaignId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Workflow Operations",
+      "item": [
+        {
+          "name": "Start Campaign - Auto Timing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timingMode\": \"auto\",\n  \"browserType\": \"chrome\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "start"]
+            },
+            "description": "Start a campaign with auto timing (uses database timing settings)"
+          }
+        },
+        {
+          "name": "Start Campaign - Manual Timing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timingMode\": \"manual\",\n  \"manualTiming\": {\n    \"minDelay\": 30,\n    \"maxDelay\": 60\n  },\n  \"browserType\": \"chrome\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "start"]
+            },
+            "description": "Start a campaign with custom manual timing delays"
+          }
+        },
+        {
+          "name": "Pause Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentProgress\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/pause",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "pause"]
+            },
+            "description": "Pause a running campaign. Can be resumed later."
+          }
+        },
+        {
+          "name": "Stop Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentProgress\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/stop",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "stop"]
+            },
+            "description": "Stop a campaign completely. Cannot be restarted."
+          }
+        },
+        {
+          "name": "Force Close Browsers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/force-close-browsers",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "force-close-browsers"]
+            },
+            "description": "Emergency endpoint to force close all Chrome browser sessions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress & Status",
+      "item": [
+        {
+          "name": "Get Campaign Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "progress"]
+            },
+            "description": "Get detailed progress information for a campaign"
+          }
+        },
+        {
+          "name": "Get Campaign Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}"]
+            },
+            "description": "Get full campaign details including status"
+          }
+        },
+        {
+          "name": "List All Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns?page=1&pageSize=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get all campaigns for the authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaign Management",
+      "item": [
+        {
+          "name": "Create Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Campaign\",\n  \"description\": \"Campaign description\",\n  \"campaignTemplateId\": 1,\n  \"messageContent\": \"Hello {Name}, this is a test message!\",\n  \"totalContacts\": 100,\n  \"useGenderTemplates\": false,\n  \"maleContent\": \"\",\n  \"femaleContent\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            },
+            "description": "Create a new campaign"
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}"]
+            },
+            "description": "Delete a campaign (cannot delete running campaigns)"
+          }
+        }
+      ]
+    }
+  ]
+}

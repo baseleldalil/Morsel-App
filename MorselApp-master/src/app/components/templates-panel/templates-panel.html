@@ -1,0 +1,193 @@
+<div class="templates-panel">
+  <!-- Header -->
+  <div class="panel-header">
+    <h3>Campaign Templates</h3>
+    <div class="header-actions">
+      <button class="save-template-btn" (click)="openSaveModal()" title="Save as Template">
+        💾
+      </button>
+      <button class="refresh-btn" [class.spinning]="isLoading()" (click)="refreshTemplates()" [disabled]="isLoading()">
+        🔄
+      </button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <input
+      type="text"
+      placeholder="Search templates..."
+      [value]="searchValue"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'system'"
+      (click)="setActiveTab('system')"
+    >
+      <span class="tab-icon">⚙️</span>
+      System
+      <span class="tab-count">{{ systemCount() }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'user'"
+      (click)="setActiveTab('user')"
+    >
+      <span class="tab-icon">👤</span>
+      My Templates
+      <span class="tab-count">{{ userCount() }}</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Loading templates...</p>
+    </div>
+  }
+
+  <!-- Templates List -->
+  <div class="templates-list">
+    @for (template of templates(); track template.id) {
+      <div class="template-card" (click)="loadTemplate(template)">
+        <div class="template-icon">{{ template.icon || '📝' }}</div>
+        <div class="template-content">
+          <h4 class="template-title">{{ template.title }}</h4>
+          <p class="template-description">{{ truncateText(template.content) }}</p>
+          <span class="template-date">📅 {{ formatDate(template.createdAt) }}</span>
+        </div>
+        <div class="template-actions">
+          <button class="load-btn" (click)="$event.stopPropagation(); loadTemplate(template)" title="Load Template">
+            ⬆️
+          </button>
+          @if (activeTab() === 'user') {
+            <button class="delete-btn" (click)="confirmDelete($event, template)" title="Delete Template">
+              🗑️
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (templates().length === 0 && !isLoading()) {
+      <div class="empty-state">
+        <span class="empty-icon">📭</span>
+        @if (activeTab() === 'user') {
+          <p>No templates yet</p>
+          <span class="empty-hint">Compose a message and click 💾 to save as template</span>
+        } @else {
+          <p>No system templates found</p>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
+        ◀
+      </button>
+      <span class="page-info">{{ currentPage() }} / {{ totalPages() }}</span>
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() >= totalPages()">
+        ▶
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Save Template Modal -->
+@if (showSaveModal()) {
+  <div class="modal-overlay" (click)="closeSaveModal()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Save as Template</h3>
+        <button class="modal-close" (click)="closeSaveModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="templateName">Template Name *</label>
+          <input
+            type="text"
+            id="templateName"
+            [value]="saveForm().name"
+            (input)="updateSaveForm('name', $any($event.target).value)"
+            placeholder="Enter template name"
+            maxlength="100"
+          />
+        </div>
+        <div class="form-group">
+          <label for="templateDesc">Description (optional)</label>
+          <input
+            type="text"
+            id="templateDesc"
+            [value]="saveForm().description"
+            (input)="updateSaveForm('description', $any($event.target).value)"
+            placeholder="Enter template description"
+          />
+        </div>
+        <div class="form-group">
+          <label for="maleContent">Male Message *</label>
+          <textarea
+            id="maleContent"
+            [value]="saveForm().maleContent"
+            (input)="updateSaveForm('maleContent', $any($event.target).value)"
+            placeholder="Enter message for male contacts"
+            rows="4"
+            dir="auto"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="femaleContent">Female Message</label>
+          <textarea
+            id="femaleContent"
+            [value]="saveForm().femaleContent"
+            (input)="updateSaveForm('femaleContent', $any($event.target).value)"
+            placeholder="Enter message for female contacts (optional - will use male message if empty)"
+            rows="4"
+            dir="auto"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeSaveModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveAsTemplate()" [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="btn-spinner"></span> Saving...
+          } @else {
+            Save Template
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal()) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Template</h3>
+        <button class="modal-close" (click)="cancelDelete()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">
+          Are you sure you want to delete <strong>"{{ templateToDelete()?.title }}"</strong>?
+        </p>
+        <p class="confirm-warning">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteTemplate()">Delete</button>
+      </div>
+    </div>
+  </div>
+}

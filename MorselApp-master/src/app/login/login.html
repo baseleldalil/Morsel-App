@@ -1,0 +1,74 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="logo-section">
+      <h1 class="logo-text">مورسل</h1>
+      <span class="logo-tagline">more sell</span>
+    </div>
+
+    <!-- Welcome Text -->
+    <div class="welcome-section">
+      <h2 class="welcome-title">Welcome Back</h2>
+      <p class="welcome-subtitle">Sign in to continue to your dashboard</p>
+    </div>
+
+    <!-- Login Form -->
+    <form class="login-form" (ngSubmit)="onSignIn()">
+      <!-- Error Message -->
+      @if (errorMessage) {
+        <div class="error-message">
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label class="form-label">
+          <span class="label-icon">✉</span>
+          Username
+        </label>
+        <input
+          type="text"
+          class="form-input"
+          placeholder="admin"
+          [(ngModel)]="email"
+          name="email"
+        />
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label class="form-label">
+          <span class="label-icon">🔒</span>
+          Password
+        </label>
+        <input
+          type="password"
+          class="form-input"
+          placeholder="••••••••"
+          [(ngModel)]="password"
+          name="password"
+        />
+      </div>
+
+      <!-- Remember Me -->
+      <div class="remember-section">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          <span class="checkbox-text">Remember me</span>
+        </label>
+      </div>
+
+      <!-- Sign In Button -->
+      <button type="submit" class="signin-button">
+        <span class="button-icon">→</span>
+        Sign In
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>© 2025 Morsel - WhatsApp Sender</p>
+    </div>
+  </div>
+</div>

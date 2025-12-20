@@ -1,0 +1,205 @@
+@model CampaignTemplate
+
+@{
+    ViewData["Title"] = "Edit Campaign Template";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit Campaign Template</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" enctype="multipart/form-data">
+                    @Html.HiddenFor(model => model.Id)
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label">Template Name</label>
+                                <input asp-for="Name" class="form-control" placeholder="e.g., Welcome Message" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="Category" class="form-label">Category</label>
+                                <select asp-for="Category" class="form-select">
+                                    <option value="">-- Select Category --</option>
+                                    <option value="General">General</option>
+                                    <option value="Welcome">Welcome</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Promotional">Promotional</option>
+                                    <option value="Transactional">Transactional</option>
+                                    <option value="Support">Support</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Notification">Notification</option>
+                                    <option value="Reminder">Reminder</option>
+                                    <option value="Announcement">Announcement</option>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        @foreach (var category in (IEnumerable<string>)ViewBag.Categories)
+                                        {
+                                            @if (!new[] { "General", "Welcome", "Marketing", "Promotional", "Transactional", "Support", "Follow-up", "Notification", "Reminder", "Announcement" }.Contains(category))
+                                            {
+                                                <option value="@category">@category</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="2" placeholder="Brief description of when to use this template"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MessageContent" class="form-label">Message Content</label>
+                        <textarea asp-for="MessageContent" class="form-control" rows="6" placeholder="Enter your message content here. You can use variables like {name}, {company}, etc."></textarea>
+                        <span asp-validation-for="MessageContent" class="text-danger"></span>
+                        <div class="form-text">
+                            <strong>Character count:</strong> <span id="charCount">0</span> / 2000
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ImageUrl" class="form-label">Image URL (Optional)</label>
+                        <input asp-for="ImageUrl" class="form-control" type="url" placeholder="https://example.com/image.jpg" />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        <div class="form-text">Provide a URL to an image that will be included with this template.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">File Attachments</label>
+                        <input type="file" class="form-control" name="attachments" multiple
+                               accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.avi,.pdf,.doc,.docx,.csv,.xls,.xlsx" />
+                        <div class="form-text">
+                            Supported formats: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), Documents (PDF, Word), Spreadsheets (CSV, Excel)
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                Is Active
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Update Template
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="bi bi-eye me-2"></i>View Details
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Preview</h6>
+            </div>
+            <div class="card-body">
+                <div class="message-preview border rounded p-3" style="background-color: #e3f2fd; min-height: 200px;">
+                    <div id="previewContent">
+                        @if (!string.IsNullOrEmpty(Model.MessageContent))
+                        {
+                            @Html.Raw(Model.MessageContent.Replace("\n", "<br>"))
+                        }
+                        else
+                        {
+                            <em class="text-muted">Type your message to see a preview...</em>
+                        }
+                    </div>
+                    <div id="previewImage" class="mt-2" style="@(string.IsNullOrEmpty(Model.ImageUrl) ? "display: none;" : "")">
+                        <img id="previewImg" src="@Model.ImageUrl" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Template Variables</h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text">You can use these variables in your message:</p>
+                <ul class="list-unstyled">
+                    <li><code>{name}</code> - Customer name</li>
+                    <li><code>{company}</code> - Company name</li>
+                    <li><code>{phone}</code> - Phone number</li>
+                    <li><code>{date}</code> - Current date</li>
+                    <li><code>{time}</code> - Current time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageContent = document.getElementById('MessageContent');
+            const charCount = document.getElementById('charCount');
+            const previewContent = document.getElementById('previewContent');
+            const imageUrl = document.getElementById('ImageUrl');
+            const previewImage = document.getElementById('previewImage');
+            const previewImg = document.getElementById('previewImg');
+
+            function updateCharCount() {
+                const count = messageContent.value.length;
+                charCount.textContent = count;
+                charCount.className = count > 2000 ? 'text-danger' : '';
+            }
+
+            function updatePreview() {
+                const content = messageContent.value.trim();
+                if (content) {
+                    previewContent.innerHTML = content.replace(/\n/g, '<br>');
+                } else {
+                    previewContent.innerHTML = '<em class="text-muted">Type your message to see a preview...</em>';
+                }
+            }
+
+            function updateImagePreview() {
+                const url = imageUrl.value.trim();
+                if (url) {
+                    previewImg.src = url;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.style.display = 'none';
+                }
+            }
+
+            messageContent.addEventListener('input', function() {
+                updateCharCount();
+                updatePreview();
+            });
+
+            imageUrl.addEventListener('input', updateImagePreview);
+
+            // Initial updates
+            updateCharCount();
+            updatePreview();
+            updateImagePreview();
+        });
+    </script>
+}

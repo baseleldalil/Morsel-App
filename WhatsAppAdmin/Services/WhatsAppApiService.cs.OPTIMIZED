@@ -1,0 +1,399 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
+using WhatsAppAdmin.Models.API;
+
+namespace WhatsAppAdmin.Services
+{
+    public interface IWhatsAppApiService
+    {
+        Task<UserApiKey?> CreateApiKeyAsync(string userEmail, int subscriptionId, string name);
+        Task<List<UserApiKey>> GetUserApiKeysAsync(string userEmail);
+        Task<bool> RevokeApiKeyAsync(int apiKeyId, string userEmail);
+        Task<SendMessageResult> SendMessagesAsync(string apiKey, SendBulkMessageRequest request);
+        Task<ApiUsageResponse?> GetUsageStatsAsync(string apiKey);
+        Task<bool> TestApiConnectionAsync(string apiKey);
+        Task<int?> AssignSubscriptionAsync(int userId, string userEmail, int subscriptionId, DateTime? expiresAt, bool isActive, string? password);
+    }
+
+    public class WhatsAppApiService : IWhatsAppApiService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<WhatsAppApiService> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IMemoryCache _cache;
+        private readonly string _apiBaseUrl;
+
+        // Cache keys
+        private const string CACHE_KEY_API_KEYS = "ApiKeys_{0}";
+        private const string CACHE_KEY_USAGE_STATS = "UsageStats_{0}";
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+
+        public WhatsAppApiService(
+            HttpClient httpClient,
+            ILogger<WhatsAppApiService> logger,
+            IConfiguration configuration,
+            IMemoryCache cache)
+        {
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+
+            _apiBaseUrl = _configuration["WhatsAppAPI:BaseUrl"] ?? "http://localhost:7000/api";
+
+            // Configure HttpClient base settings
+            _httpClient.BaseAddress = new Uri(_apiBaseUrl);
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+        }
+
+        public async Task<UserApiKey?> CreateApiKeyAsync(string userEmail, int subscriptionId, string name)
+        {
+            try
+            {
+                var request = new
+                {
+                    UserEmail = userEmail,
+                    SubscriptionId = subscriptionId,
+                    Name = name
+                };
+
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("/apikeys/create", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+
+                    // FIXED: Use strongly-typed deserialization instead of dynamic
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var result = JsonSerializer.Deserialize<CreateApiKeyResponse>(responseJson, options);
+
+                    if (result == null)
+                    {
+                        _logger.LogError("Failed to deserialize API key response");
+                        return null;
+                    }
+
+                    // Invalidate cache
+                    _cache.Remove(string.Format(CACHE_KEY_API_KEYS, userEmail));
+
+                    return new UserApiKey
+                    {
+                        KeyValue = result.ApiKey ?? "",
+                        Name = result.Name ?? "",
+                        CreatedAt = result.CreatedAt,
+                        ExpiresAt = result.ExpiresAt,
+                        IsActive = true
+                    };
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to create API key. Status: {StatusCode}, Error: {Error}",
+                        response.StatusCode, errorContent);
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating API key for user: {UserEmail}", userEmail);
+                return null;
+            }
+        }
+
+        public async Task<List<UserApiKey>> GetUserApiKeysAsync(string userEmail)
+        {
+            // Check cache first
+            var cacheKey = string.Format(CACHE_KEY_API_KEYS, userEmail);
+            if (_cache.TryGetValue(cacheKey, out List<UserApiKey>? cachedKeys) && cachedKeys != null)
+            {
+                _logger.LogDebug("Returning cached API keys for user: {UserEmail}", userEmail);
+                return cachedKeys;
+            }
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"/apikeys/user/{userEmail}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var document = JsonDocument.Parse(json);
+                    var apiKeysArray = document.RootElement.GetProperty("apiKeys");
+
+                    var apiKeys = new List<UserApiKey>();
+                    foreach (var keyElement in apiKeysArray.EnumerateArray())
+                    {
+                        apiKeys.Add(new UserApiKey
+                        {
+                            Id = keyElement.GetProperty("id").GetInt32(),
+                            Name = keyElement.GetProperty("name").GetString() ?? "",
+                            KeyPreview = keyElement.GetProperty("keyPreview").GetString() ?? "",
+                            SubscriptionPlan = keyElement.GetProperty("subscriptionPlan").GetString() ?? "",
+                            IsActive = keyElement.GetProperty("isActive").GetBoolean(),
+                            UsageCount = keyElement.GetProperty("usageCount").GetInt32(),
+                            DailyUsageCount = keyElement.GetProperty("dailyUsageCount").GetInt32(),
+                            LastUsedAt = keyElement.TryGetProperty("lastUsedAt", out var lastUsed) && lastUsed.ValueKind != JsonValueKind.Null
+                                ? DateTime.Parse(lastUsed.GetString()!) : null,
+                            CreatedAt = DateTime.Parse(keyElement.GetProperty("createdAt").GetString()!),
+                            ExpiresAt = keyElement.TryGetProperty("expiresAt", out var expires) && expires.ValueKind != JsonValueKind.Null
+                                ? DateTime.Parse(expires.GetString()!) : null
+                        });
+                    }
+
+                    // Cache the result
+                    var cacheOptions = new MemoryCacheEntryOptions()
+                        .SetAbsoluteExpiration(CacheDuration)
+                        .SetSize(1);
+                    _cache.Set(cacheKey, apiKeys, cacheOptions);
+
+                    return apiKeys;
+                }
+
+                return new List<UserApiKey>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting API keys for user: {UserEmail}", userEmail);
+                return new List<UserApiKey>();
+            }
+        }
+
+        public async Task<bool> RevokeApiKeyAsync(int apiKeyId, string userEmail)
+        {
+            try
+            {
+                var request = new
+                {
+                    ApiKeyId = apiKeyId,
+                    UserEmail = userEmail
+                };
+
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("/apikeys/revoke", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Invalidate cache
+                    _cache.Remove(string.Format(CACHE_KEY_API_KEYS, userEmail));
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error revoking API key {ApiKeyId} for user: {UserEmail}", apiKeyId, userEmail);
+                return false;
+            }
+        }
+
+        public async Task<SendMessageResult> SendMessagesAsync(string apiKey, SendBulkMessageRequest request)
+        {
+            try
+            {
+                // Convert request to API format
+                var apiRequest = new
+                {
+                    Messages = request.Messages.Select(m => new
+                    {
+                        Phone = m.Phone,
+                        Messages = m.Messages,
+                        FileBase64 = m.FileBase64,
+                        FileName = m.FileName,
+                        FileType = m.FileType
+                    }).ToList(),
+                    DelayBetweenMessages = request.DelayBetweenMessages,
+                    SendImmediately = request.SendImmediately
+                };
+
+                var json = JsonSerializer.Serialize(apiRequest);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // FIXED: Use per-request headers instead of modifying shared HttpClient
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/whatsapp/send")
+                {
+                    Content = content
+                };
+                requestMessage.Headers.Add("X-API-Key", apiKey);
+
+                var response = await _httpClient.SendAsync(requestMessage);
+                var responseJson = await response.Content.ReadAsStringAsync();
+
+                using var document = JsonDocument.Parse(responseJson);
+                var root = document.RootElement;
+
+                var result = new SendMessageResult
+                {
+                    Success = root.GetProperty("success").GetBoolean(),
+                    Message = root.GetProperty("message").GetString() ?? "",
+                    ProcessedCount = root.TryGetProperty("processedCount", out var pc) ? pc.GetInt32() : 0,
+                    FailedCount = root.TryGetProperty("failedCount", out var fc) ? fc.GetInt32() : 0,
+                    RemainingQuota = root.TryGetProperty("remainingQuota", out var rq) ? rq.GetInt32() : 0,
+                    Errors = root.TryGetProperty("errors", out var errors)
+                        ? errors.EnumerateArray().Select(e => e.GetString() ?? "").ToList()
+                        : new List<string>()
+                };
+
+                // Invalidate usage cache on successful send
+                if (result.Success)
+                {
+                    _cache.Remove(string.Format(CACHE_KEY_USAGE_STATS, apiKey));
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending WhatsApp messages");
+                return new SendMessageResult
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        public async Task<ApiUsageResponse?> GetUsageStatsAsync(string apiKey)
+        {
+            // Check cache first
+            var cacheKey = string.Format(CACHE_KEY_USAGE_STATS, apiKey);
+            if (_cache.TryGetValue(cacheKey, out ApiUsageResponse? cachedUsage) && cachedUsage != null)
+            {
+                _logger.LogDebug("Returning cached usage stats for API key");
+                return cachedUsage;
+            }
+
+            try
+            {
+                // FIXED: Use per-request headers
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/whatsapp/usage");
+                requestMessage.Headers.Add("X-API-Key", apiKey);
+
+                var response = await _httpClient.SendAsync(requestMessage);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var document = JsonDocument.Parse(json);
+                    var root = document.RootElement;
+
+                    var usage = new ApiUsageResponse
+                    {
+                        TotalMessages = root.GetProperty("totalMessages").GetInt32(),
+                        TodayMessages = root.GetProperty("todayMessages").GetInt32(),
+                        RemainingQuota = root.GetProperty("remainingQuota").GetInt32(),
+                        LastUsed = DateTime.Parse(root.GetProperty("lastUsed").GetString()!),
+                        SubscriptionPlan = root.GetProperty("subscriptionPlan").GetString() ?? ""
+                    };
+
+                    // Cache the result
+                    var cacheOptions = new MemoryCacheEntryOptions()
+                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(1)) // Shorter cache for usage stats
+                        .SetSize(1);
+                    _cache.Set(cacheKey, usage, cacheOptions);
+
+                    return usage;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting usage stats");
+                return null;
+            }
+        }
+
+        public async Task<bool> TestApiConnectionAsync(string apiKey)
+        {
+            try
+            {
+                // FIXED: Use per-request headers
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/whatsapp/test");
+                requestMessage.Headers.Add("X-API-Key", apiKey);
+
+                var response = await _httpClient.SendAsync(requestMessage);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error testing API connection");
+                return false;
+            }
+        }
+
+        public async Task<int?> AssignSubscriptionAsync(int userId, string userEmail, int subscriptionId,
+            DateTime? expiresAt, bool isActive, string? password)
+        {
+            try
+            {
+                _logger.LogInformation("Preparing request - UserId: {UserId}, Email: {Email}, SubId: {SubId}",
+                    userId, userEmail, subscriptionId);
+
+                var request = new
+                {
+                    UserId = userId,
+                    UserEmail = userEmail,
+                    SubscriptionId = subscriptionId,
+                    ExpiresAt = expiresAt,
+                    IsActive = isActive,
+                    Password = password
+                };
+
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogInformation("Sending request to API: {Json}", json);
+
+                var response = await _httpClient.PostAsync("/Admin/subscriptions/assign", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    using var document = JsonDocument.Parse(responseJson);
+                    var root = document.RootElement;
+
+                    var returnedUserId = root.GetProperty("userId").GetInt32();
+
+                    _logger.LogInformation("Successfully assigned subscription {SubscriptionId} to user {UserEmail}, UserId: {UserId}",
+                        subscriptionId, userEmail, returnedUserId);
+
+                    return returnedUserId;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to assign subscription. Status: {StatusCode}, Error: {Error}",
+                        response.StatusCode, errorContent);
+                    throw new Exception($"API Error: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning subscription to user: {UserEmail}", userEmail);
+                return null;
+            }
+        }
+    }
+
+    // ==================== DTOs (Strongly Typed) ====================
+    public class CreateApiKeyResponse
+    {
+        public string? ApiKey { get; set; }
+        public string? Name { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? ExpiresAt { get; set; }
+    }
+}

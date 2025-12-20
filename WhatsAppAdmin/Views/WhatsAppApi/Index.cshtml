@@ -1,0 +1,165 @@
+@model IEnumerable<WhatsAppAdmin.Models.API.UserApiKey>
+
+@{
+    ViewData["Title"] = "WhatsApp API Management";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">WhatsApp API Keys</h4>
+                <div>
+                    <a asp-action="CreateApiKey" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create API Key
+                    </a>
+                    <a asp-action="SendMessages" class="btn btn-success">
+                        <i class="bi bi-send me-2"></i>Send Messages
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    @if (TempData["NewApiKey"] != null)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <h6>Your new API Key (save this, it won't be shown again):</h6>
+                            <code class="user-select-all">@TempData["NewApiKey"]</code>
+                        </div>
+                    }
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>API Key</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th>Usage</th>
+                                <th>Last Used</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var apiKey in Model)
+                            {
+                                <tr>
+                                    <td>@apiKey.Name</td>
+                                    <td>
+                                        <code>@apiKey.KeyPreview</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@apiKey.SubscriptionPlan</span>
+                                    </td>
+                                    <td>
+                                        @if (apiKey.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Revoked</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>
+                                            Today: <strong>@apiKey.DailyUsageCount</strong><br>
+                                            Total: @apiKey.UsageCount
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @if (apiKey.LastUsedAt.HasValue)
+                                        {
+                                            @apiKey.LastUsedAt.Value.ToString("MMM dd, HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Never</span>
+                                        }
+                                    </td>
+                                    <td>@apiKey.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            @if (apiKey.IsActive)
+                                            {
+                                                <a asp-action="Usage" asp-route-apiKey="@apiKey.KeyValue"
+                                                   class="btn btn-sm btn-outline-info" title="View Usage">
+                                                    <i class="bi bi-bar-chart"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                                        onclick="testConnection('@apiKey.KeyValue')" title="Test Connection">
+                                                    <i class="bi bi-wifi"></i>
+                                                </button>
+                                                <form asp-action="RevokeApiKey" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Are you sure you want to revoke this API key?')">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="apiKeyId" value="@apiKey.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Revoke">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-4">
+                        <h5 class="text-muted">No API keys found</h5>
+                        <p>Create your first API key to start sending WhatsApp messages.</p>
+                        <a asp-action="CreateApiKey" class="btn btn-primary">Create API Key</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function testConnection(apiKey) {
+            try {
+                const response = await fetch('@Url.Action("TestConnection")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: 'apiKey=' + encodeURIComponent(apiKey)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Connection successful!');
+                } else {
+                    alert('❌ Connection failed: ' + result.message);
+                }
+            } catch (error) {
+                alert('❌ Error testing connection: ' + error.message);
+            }
+        }
+    </script>
+}

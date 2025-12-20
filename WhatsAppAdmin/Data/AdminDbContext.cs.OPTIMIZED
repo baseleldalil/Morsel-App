@@ -1,0 +1,172 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using WhatsAppAdmin.Models;
+
+namespace WhatsAppAdmin.Data
+{
+    /// <summary>
+    /// Database context for the WhatsApp Admin module
+    /// Manages all entity relationships and database operations
+    /// OPTIMIZED: Added additional indexes for performance
+    /// </summary>
+    public class AdminDbContext : IdentityDbContext<AdminUser>
+    {
+        public AdminDbContext(DbContextOptions<AdminDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<SubscriptionPermission> SubscriptionPermissions { get; set; }
+        public DbSet<TimerSettings> TimerSettings { get; set; }
+        public DbSet<CampaignTemplate> CampaignTemplates { get; set; }
+        public DbSet<TemplateAttachment> TemplateAttachments { get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Configure SubscriptionPermission junction table
+            builder.Entity<SubscriptionPermission>()
+                .HasKey(sp => new { sp.SubscriptionId, sp.PermissionId });
+
+            builder.Entity<SubscriptionPermission>()
+                .HasOne(sp => sp.Subscription)
+                .WithMany(s => s.SubscriptionPermissions)
+                .HasForeignKey(sp => sp.SubscriptionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<SubscriptionPermission>()
+                .HasOne(sp => sp.Permission)
+                .WithMany(p => p.SubscriptionPermissions)
+                .HasForeignKey(sp => sp.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure TimerSettings relationship
+            builder.Entity<TimerSettings>()
+                .HasOne(ts => ts.Subscription)
+                .WithOne(s => s.TimerSettings)
+                .HasForeignKey<TimerSettings>(ts => ts.SubscriptionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure UserSubscription relationship
+            builder.Entity<UserSubscription>()
+                .HasOne(us => us.Subscription)
+                .WithMany(s => s.UserSubscriptions)
+                .HasForeignKey(us => us.SubscriptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ==================== PERFORMANCE INDEXES ====================
+
+            // EXISTING: UserSubscription indexes
+            builder.Entity<UserSubscription>()
+                .HasIndex(us => us.UserId);
+
+            builder.Entity<UserSubscription>()
+                .HasIndex(us => us.UserEmail);
+
+            // NEW: Composite index for active subscription queries
+            builder.Entity<UserSubscription>()
+                .HasIndex(us => new { us.IsActive, us.ExpiresAt })
+                .HasDatabaseName("IX_UserSubscriptions_Active_Expires");
+
+            // NEW: Index on ExpiresAt for expiration checks
+            builder.Entity<UserSubscription>()
+                .HasIndex(us => us.ExpiresAt)
+                .HasDatabaseName("IX_UserSubscriptions_ExpiresAt");
+
+            // EXISTING: Permission name unique index
+            builder.Entity<Permission>()
+                .HasIndex(p => p.Name)
+                .IsUnique();
+
+            // EXISTING: Subscription name unique index
+            builder.Entity<Subscription>()
+                .HasIndex(s => s.Name)
+                .IsUnique();
+
+            // NEW: Index on Subscription IsActive
+            builder.Entity<Subscription>()
+                .HasIndex(s => s.IsActive)
+                .HasDatabaseName("IX_Subscriptions_IsActive");
+
+            // NEW: CampaignTemplate indexes
+            builder.Entity<CampaignTemplate>()
+                .HasIndex(ct => ct.CreatedAt)
+                .HasDatabaseName("IX_CampaignTemplates_CreatedAt");
+
+            builder.Entity<CampaignTemplate>()
+                .HasIndex(ct => ct.UpdatedAt)
+                .HasDatabaseName("IX_CampaignTemplates_UpdatedAt");
+
+            builder.Entity<CampaignTemplate>()
+                .HasIndex(ct => ct.IsActive)
+                .HasDatabaseName("IX_CampaignTemplates_IsActive");
+
+            // NEW: Composite index for common queries (active templates sorted by date)
+            builder.Entity<CampaignTemplate>()
+                .HasIndex(ct => new { ct.IsActive, ct.CreatedAt })
+                .HasDatabaseName("IX_CampaignTemplates_Active_Created");
+
+            // NEW: TemplateAttachment foreign key index
+            builder.Entity<TemplateAttachment>()
+                .HasIndex(ta => ta.CampaignTemplateId)
+                .HasDatabaseName("IX_TemplateAttachments_TemplateId");
+
+            // ==================== PRECISION CONFIGURATION ====================
+
+            // Configure decimal precision for Price field
+            builder.Entity<Subscription>()
+                .Property(s => s.Price)
+                .HasPrecision(18, 2);
+
+            // ==================== RELATIONSHIPS ====================
+
+            // Configure TemplateAttachment relationship
+            builder.Entity<TemplateAttachment>()
+                .HasOne(ta => ta.CampaignTemplate)
+                .WithMany(ct => ct.Attachments)
+                .HasForeignKey(ta => ta.CampaignTemplateId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ==================== SEED DATA ====================
+
+            // Configure admin roles
+            builder.Entity<IdentityRole>().HasData(
+                new IdentityRole { Id = "1", Name = "SuperAdmin", NormalizedName = "SUPERADMIN" },
+                new IdentityRole { Id = "2", Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole { Id = "3", Name = "SemiAdmin", NormalizedName = "SEMIADMIN" }
+            );
+
+            // ==================== QUERY FILTERS (OPTIONAL) ====================
+
+            // Global query filter for soft delete (if you add IsDeleted property later)
+            // builder.Entity<CampaignTemplate>().HasQueryFilter(ct => !ct.IsDeleted);
+        }
+
+        // ==================== SAVECHANGES OPTIMIZATION ====================
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // Auto-update timestamp fields
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                if (entry.Entity is CampaignTemplate template)
+                {
+                    if (entry.State == EntityState.Added)
+                    {
+                        template.CreatedAt = DateTime.UtcNow;
+                    }
+                    template.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+    }
+}

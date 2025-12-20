@@ -1,0 +1,494 @@
+{
+	"info": {
+		"_postman_id": "whatsapp-sender-api-collection",
+		"name": "WhatsApp Sender API",
+		"description": "Complete API collection for WhatsApp Sender service with endpoints for message sending, API key management, and usage tracking.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "whatsapp-sender-api"
+	},
+	"item": [
+		{
+			"name": "WhatsApp Messages",
+			"item": [
+				{
+					"name": "Send WhatsApp Messages",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Set default API key if not set",
+									"if (!pm.environment.get(\"api_key\")) {",
+									"    pm.environment.set(\"api_key\", \"your-api-key-here\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"description": "Your API key for authentication"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"messages\": [\n                \"Hello from WhatsApp Sender API!\",\n                \"This is a test message.\"\n            ],\n            \"fileBase64\": null,\n            \"fileName\": null,\n            \"fileType\": null\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"messages\": [\n                \"Another test message for different recipient\"\n            ]\n        }\n    ],\n    \"delayBetweenMessages\": 5000,\n    \"sendImmediately\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/whatsapp/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"whatsapp",
+								"send"
+							]
+						},
+						"description": "Send WhatsApp messages to multiple recipients. Supports text messages and file attachments (base64 encoded)."
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-API-Key",
+										"value": "{{api_key}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"messages\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"messages\": [\"Test message\"]\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/whatsapp/send",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"whatsapp",
+										"send"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Messages sent successfully\",\n    \"processedCount\": 1,\n    \"failedCount\": 0,\n    \"errors\": [],\n    \"remainingQuota\": 95\n}"
+						}
+					]
+				},
+				{
+					"name": "Send Message with File Attachment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"messages\": [\n                \"Here's the document you requested.\"\n            ],\n            \"fileBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n            \"fileName\": \"test-image.png\",\n            \"fileType\": \"image/png\"\n        }\n    ],\n    \"delayBetweenMessages\": 3000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/whatsapp/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"whatsapp",
+								"send"
+							]
+						},
+						"description": "Example of sending a message with a file attachment. File must be base64 encoded."
+					}
+				},
+				{
+					"name": "Get API Usage Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/whatsapp/usage",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"whatsapp",
+								"usage"
+							]
+						},
+						"description": "Get usage statistics for your API key including message counts and remaining quota."
+					},
+					"response": [
+						{
+							"name": "Usage Stats Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-API-Key",
+										"value": "{{api_key}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/whatsapp/usage",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"whatsapp",
+										"usage"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"totalMessages\": 45,\n    \"todayMessages\": 5,\n    \"remainingQuota\": 95,\n    \"lastUsed\": \"2023-12-01T10:30:00Z\",\n    \"subscriptionPlan\": \"Basic Plan\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Test API Connection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/whatsapp/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"whatsapp",
+								"test"
+							]
+						},
+						"description": "Test your API connection and validate your API key."
+					},
+					"response": [
+						{
+							"name": "Connection Test Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-API-Key",
+										"value": "{{api_key}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/whatsapp/test",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"whatsapp",
+										"test"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"API connection successful\",\n    \"user\": \"user@example.com\",\n    \"plan\": \"Basic Plan\",\n    \"service_status\": \"Available\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Endpoints for sending WhatsApp messages and checking service status."
+		},
+		{
+			"name": "API Key Management",
+			"item": [
+				{
+					"name": "Create API Key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userEmail\": \"user@example.com\",\n    \"subscriptionId\": 2,\n    \"name\": \"Production API Key\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/apikeys/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apikeys",
+								"create"
+							]
+						},
+						"description": "Create a new API key for a user with specified subscription plan."
+					},
+					"response": [
+						{
+							"name": "API Key Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userEmail\": \"user@example.com\",\n    \"subscriptionId\": 2,\n    \"name\": \"Test Key\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/apikeys/create",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"apikeys",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"API key created successfully\",\n    \"apiKey\": \"wsa_1234567890abcdef1234567890abcdef12345678\",\n    \"name\": \"Test Key\",\n    \"subscriptionId\": 2,\n    \"expiresAt\": \"2024-12-01T00:00:00Z\",\n    \"createdAt\": \"2023-12-01T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User API Keys",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apikeys/user/{{user_email}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apikeys",
+								"user",
+								"{{user_email}}"
+							]
+						},
+						"description": "Get all API keys for a specific user."
+					},
+					"response": [
+						{
+							"name": "User API Keys",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/apikeys/user/user@example.com",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"apikeys",
+										"user",
+										"user@example.com"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"apiKeys\": [\n        {\n            \"id\": 1,\n            \"name\": \"Production Key\",\n            \"keyPreview\": \"wsa_12345678...\",\n            \"subscriptionPlan\": \"Basic Plan\",\n            \"isActive\": true,\n            \"usageCount\": 45,\n            \"dailyUsageCount\": 5,\n            \"lastUsedAt\": \"2023-12-01T10:30:00Z\",\n            \"createdAt\": \"2023-11-01T09:15:00Z\",\n            \"expiresAt\": \"2024-11-01T09:15:00Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Revoke API Key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiKeyId\": 1,\n    \"userEmail\": \"user@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/apikeys/revoke",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apikeys",
+								"revoke"
+							]
+						},
+						"description": "Revoke (disable) an API key for a user."
+					},
+					"response": [
+						{
+							"name": "API Key Revoked",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"apiKeyId\": 1,\n    \"userEmail\": \"user@example.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/apikeys/revoke",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"apikeys",
+										"revoke"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"API key revoked successfully\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Endpoints for managing API keys - creation, listing, and revocation."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set default environment variables if not already set",
+					"if (!pm.environment.get(\"base_url\")) {",
+					"    pm.environment.set(\"base_url\", \"https://localhost:7080\");",
+					"}",
+					"",
+					"if (!pm.environment.get(\"user_email\")) {",
+					"    pm.environment.set(\"user_email\", \"test@example.com\");",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:7080",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "your-api-key-here",
+			"type": "string"
+		},
+		{
+			"key": "user_email",
+			"value": "test@example.com",
+			"type": "string"
+		}
+	]
+}

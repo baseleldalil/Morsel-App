@@ -1,0 +1,286 @@
+@model CampaignTemplate
+
+@{
+    ViewData["Title"] = "Create Campaign Template";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Create New Campaign Template</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Template Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="e.g., Welcome Message" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MessageContent" class="form-label">Template Content</label>
+                        <textarea asp-for="MessageContent" class="form-control preserve-formatting" rows="10" placeholder="Enter your message content here. You can use variables like {arabic_name}, {english_name}, {emoji}" required></textarea>
+                        <span asp-validation-for="MessageContent" class="text-danger"></span>
+                        <div class="form-text">
+                            <strong>Character count:</strong> <span id="charCount">0</span> / 2000
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields with default values -->
+                    <input asp-for="Category" type="hidden" value="General" />
+                    <input asp-for="IsActive" type="hidden" value="true" />
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Create Template
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Preview</h6>
+            </div>
+            <div class="card-body">
+                <div class="message-preview border rounded p-3" style="background-color: #e3f2fd; min-height: 200px;">
+                    <div id="previewContent">
+                        <em class="text-muted">Type your message to see a preview...</em>
+                    </div>
+                    <div id="previewImage" class="mt-2" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3" id="variablePanel" style="position: sticky; top: 20px;">
+            <div class="card-header">
+                <h6 class="mb-0">Template Variables</h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Click to insert variables:</p>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-primary var-btn" data-var="{name}">
+                        <i class="bi bi-person"></i> {name}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary var-btn" data-var="{company}">
+                        <i class="bi bi-building"></i> {company}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary var-btn" data-var="{phone}">
+                        <i class="bi bi-telephone"></i> {phone}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary var-btn" data-var="{date}">
+                        <i class="bi bi-calendar"></i> {date}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary var-btn" data-var="{time}">
+                        <i class="bi bi-clock"></i> {time}
+                    </button>
+                </div>
+                <hr>
+                <p class="card-text small text-muted mb-1">Variable descriptions:</p>
+                <ul class="list-unstyled small">
+                    <li><code>{name}</code> - Customer name</li>
+                    <li><code>{company}</code> - Company name</li>
+                    <li><code>{phone}</code> - Phone number</li>
+                    <li><code>{date}</code> - Current date</li>
+                    <li><code>{time}</code> - Current time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageContent = document.getElementById('MessageContent');
+            const maleContent = document.getElementById('MaleContent');
+            const femaleContent = document.getElementById('FemaleContent');
+            const autoGenerate = document.getElementById('AutoGenerateGenderVersions');
+            const charCount = document.getElementById('charCount');
+            const charCountMale = document.getElementById('charCountMale');
+            const charCountFemale = document.getElementById('charCountFemale');
+            const previewContent = document.getElementById('previewContent');
+            const imageUrl = document.getElementById('ImageUrl');
+            const previewImage = document.getElementById('previewImage');
+            const previewImg = document.getElementById('previewImg');
+            const varButtons = document.querySelectorAll('.var-btn');
+            let lastFocusedTextarea = messageContent;
+
+            // Check if template data exists in sessionStorage
+            const storedTemplate = sessionStorage.getItem('selectedTemplate');
+            if (storedTemplate) {
+                try {
+                    const templateData = JSON.parse(storedTemplate);
+
+                    // Populate form fields
+                    if (templateData.name) {
+                        const nameField = document.getElementById('Name');
+                        if (nameField) nameField.value = templateData.name + ' (Copy)';
+                    }
+
+                    if (templateData.description) {
+                        const descField = document.getElementById('Description');
+                        if (descField) descField.value = templateData.description;
+                    }
+
+                    if (templateData.content) {
+                        messageContent.value = templateData.content;
+                    }
+
+                    if (templateData.male) {
+                        maleContent.value = templateData.male;
+                    }
+
+                    if (templateData.female) {
+                        femaleContent.value = templateData.female;
+                    }
+
+                    // Clear sessionStorage after using it
+                    sessionStorage.removeItem('selectedTemplate');
+
+                    // Trigger input events to update character counts and preview
+                    messageContent.dispatchEvent(new Event('input'));
+                    maleContent.dispatchEvent(new Event('input'));
+                    femaleContent.dispatchEvent(new Event('input'));
+                } catch (error) {
+                    console.error('Error loading template data:', error);
+                }
+            }
+
+            // Track which textarea was last focused for variable insertion
+            const textareas = [messageContent, maleContent, femaleContent];
+            textareas.forEach(ta => {
+                ta.addEventListener('focus', function() {
+                    lastFocusedTextarea = this;
+                });
+            });
+
+            // Preserve formatting on paste
+            textareas.forEach(ta => {
+                ta.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text');
+                    const cursorPos = this.selectionStart;
+                    const textBefore = this.value.substring(0, cursorPos);
+                    const textAfter = this.value.substring(this.selectionEnd);
+                    this.value = textBefore + text + textAfter;
+                    this.selectionStart = this.selectionEnd = cursorPos + text.length;
+                    this.dispatchEvent(new Event('input'));
+                });
+            });
+
+            // Variable button click handler
+            varButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const variable = this.getAttribute('data-var');
+                    insertAtCursor(lastFocusedTextarea, variable);
+                });
+            });
+
+            function insertAtCursor(textarea, text) {
+                const cursorPos = textarea.selectionStart;
+                const textBefore = textarea.value.substring(0, cursorPos);
+                const textAfter = textarea.value.substring(textarea.selectionEnd);
+                textarea.value = textBefore + text + textAfter;
+                textarea.selectionStart = textarea.selectionEnd = cursorPos + text.length;
+                textarea.focus();
+                textarea.dispatchEvent(new Event('input'));
+            }
+
+            function updateCharCount(textarea, counterElement) {
+                const count = textarea.value.length;
+                counterElement.textContent = count;
+                counterElement.className = count > 2000 ? 'text-danger' : '';
+            }
+
+            function autoGenerateGenderVersions() {
+                if (!autoGenerate.checked) return;
+
+                const content = messageContent.value;
+                if (!content) {
+                    maleContent.value = '';
+                    femaleContent.value = '';
+                    return;
+                }
+
+                // Auto-generate male version (can be customized)
+                maleContent.value = content;
+
+                // Auto-generate female version (can be customized)
+                femaleContent.value = content;
+
+                updateCharCount(maleContent, charCountMale);
+                updateCharCount(femaleContent, charCountFemale);
+            }
+
+            function updatePreview() {
+                const content = messageContent.value.trim();
+                if (content) {
+                    // Properly render the message with variables and line breaks
+                    previewContent.innerHTML = content
+                        .replace(/\n/g, '<br>')
+                        .replace(/\{name\}/g, '<strong>{name}</strong>')
+                        .replace(/\{company\}/g, '<strong>{company}</strong>')
+                        .replace(/\{phone\}/g, '<strong>{phone}</strong>')
+                        .replace(/\{date\}/g, '<strong>{date}</strong>')
+                        .replace(/\{time\}/g, '<strong>{time}</strong>');
+                } else {
+                    previewContent.innerHTML = '<em class="text-muted">Type your message to see a preview...</em>';
+                }
+            }
+
+            function updateImagePreview() {
+                const url = imageUrl.value.trim();
+                if (url) {
+                    previewImg.src = url;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.style.display = 'none';
+                }
+            }
+
+            // Event listeners
+            messageContent.addEventListener('input', function() {
+                updateCharCount(this, charCount);
+                updatePreview();
+                autoGenerateGenderVersions();
+            });
+
+            maleContent.addEventListener('input', function() {
+                updateCharCount(this, charCountMale);
+            });
+
+            femaleContent.addEventListener('input', function() {
+                updateCharCount(this, charCountFemale);
+            });
+
+            autoGenerate.addEventListener('change', function() {
+                if (this.checked) {
+                    autoGenerateGenderVersions();
+                }
+            });
+
+            imageUrl.addEventListener('input', updateImagePreview);
+
+            // Initial updates
+            updateCharCount(messageContent, charCount);
+            updateCharCount(maleContent, charCountMale);
+            updateCharCount(femaleContent, charCountFemale);
+            updatePreview();
+            updateImagePreview();
+        });
+    </script>
+}

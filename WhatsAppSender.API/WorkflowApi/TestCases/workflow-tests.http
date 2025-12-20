@@ -1,0 +1,488 @@
+### Campaign Workflow API - Executable Test Cases (CORRECTED)
+### Validated against CampaignsController.cs on 2025-11-25
+
+@baseUrl = https://localhost:5001/api
+@apiKey = YOUR_API_KEY_HERE
+@invalidApiKey = invalid_key_12345
+@campaignId = 1
+@nonExistentCampaignId = 99999
+
+###############################################################################
+### 1. START CAMPAIGN TESTS
+###############################################################################
+
+### TC-START-001: Start Campaign Successfully (Auto Timing)
+### Expected: 200 OK with timing_settings object
+# @name startCampaignAuto
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### TC-START-002: Start Campaign with Manual Timing
+### Expected: 200 OK with manual timing_settings
+# @name startCampaignManual
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "manual",
+  "manualTiming": {
+    "minDelay": 30,
+    "maxDelay": 60
+  },
+  "browserType": "chrome"
+}
+
+### TC-START-003: Start Campaign - Invalid API Key
+### Expected: 401 Unauthorized - {"error": "Invalid API key"}
+# @name startInvalidKey
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{invalidApiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### TC-START-004: Start Campaign - Missing API Key
+### Expected: 401 Unauthorized - {"error": "API key is required"}
+# @name startMissingKey
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### TC-START-009: Start Campaign - Campaign Not Found
+### Expected: 404 Not Found - {"error": "Campaign not found"}
+# @name startNotFound
+POST {{baseUrl}}/campaigns/{{nonExistentCampaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### TC-START-011: Start Campaign - Firefox Browser
+### Expected: 200 OK
+# @name startFirefox
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "firefox"
+}
+
+### TC-START-012: Start Campaign - Empty Body (Uses Defaults)
+### Expected: 200 OK with defaults (auto timing, chrome browser)
+# @name startEmptyBody
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+### TC-START-013: Resume Paused Campaign
+### Precondition: Campaign status must be "Paused"
+### Expected: 200 OK - Paused campaigns CAN be resumed
+# @name resumePausedCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+###############################################################################
+### 2. PAUSE CAMPAIGN TESTS
+###############################################################################
+
+### TC-PAUSE-001: Pause Running Campaign Successfully
+### Precondition: Campaign status must be "Running"
+### Expected: 200 OK - {"message": "Campaign paused successfully", "status": "Paused", "currentProgress": 50}
+# @name pauseCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 50
+}
+
+### TC-PAUSE-002: Pause Campaign - Invalid API Key
+### Expected: 401 Unauthorized
+# @name pauseInvalidKey
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{invalidApiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 50
+}
+
+### TC-PAUSE-003: Pause Campaign - Not Running
+### Precondition: Campaign status is NOT "Running"
+### Expected: 400 Bad Request - {"error": "Only running campaigns can be paused"}
+# @name pauseNotRunning
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 50
+}
+
+### TC-PAUSE-004: Pause Campaign - Campaign Not Found
+### Expected: 404 Not Found
+# @name pauseNotFound
+POST {{baseUrl}}/campaigns/{{nonExistentCampaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 50
+}
+
+### TC-PAUSE-005: Pause Campaign - Without Progress Body
+### Expected: 200 OK - Progress NOT updated (request is null)
+# @name pauseNoProgress
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+### TC-PAUSE-006: Pause Campaign - Progress Zero
+### Expected: 200 OK - Progress WILL be saved as 0 (>= 0 check)
+# @name pauseProgressZero
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 0
+}
+
+###############################################################################
+### 3. STOP CAMPAIGN TESTS
+###############################################################################
+
+### TC-STOP-001: Stop Running Campaign Successfully
+### Precondition: Campaign status is "Running"
+### Expected: 200 OK - {"message": "Campaign stopped successfully...", "status": "Stopped"}
+# @name stopCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 100
+}
+
+### TC-STOP-002: Stop Campaign - Invalid API Key
+### Expected: 401 Unauthorized
+# @name stopInvalidKey
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{invalidApiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 100
+}
+
+### TC-STOP-003: Stop Paused Campaign
+### Precondition: Campaign status is "Paused"
+### Expected: 200 OK - Paused campaigns CAN be stopped
+# @name stopPausedCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+### TC-STOP-004: Stop Pending Campaign
+### Precondition: Campaign status is "Pending"
+### Expected: 200 OK - Pending campaigns CAN be stopped (no status restriction)
+# @name stopPendingCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+### TC-STOP-005: Stop Campaign - Campaign Not Found
+### Expected: 404 Not Found
+# @name stopNotFound
+POST {{baseUrl}}/campaigns/{{nonExistentCampaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 0
+}
+
+### TC-STOP-007: Stop Already Stopped Campaign
+### Precondition: Campaign status is already "Stopped"
+### Expected: 200 OK - Code allows stopping already-stopped campaigns
+# @name stopAlreadyStopped
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+### TC-STOP-008: Stop Completed Campaign
+### Precondition: Campaign status is "Completed"
+### Expected: 200 OK - Code allows stopping completed campaigns
+# @name stopCompletedCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{}
+
+###############################################################################
+### 4. FORCE CLOSE BROWSERS TESTS
+###############################################################################
+
+### TC-FORCE-001: Force Close All Browsers
+### Expected: 200 OK - {"message": "Successfully force closed...", "processesKilled": X, "timestamp": "..."}
+# @name forceCloseBrowsers
+POST {{baseUrl}}/campaigns/force-close-browsers
+X-API-Key: {{apiKey}}
+
+### TC-FORCE-002: Force Close - No Browsers Running
+### Expected: 200 OK with processesKilled: 0
+# @name forceCloseNoBrowsers
+POST {{baseUrl}}/campaigns/force-close-browsers
+X-API-Key: {{apiKey}}
+
+### TC-FORCE-003: Force Close - No API Key (FIXED)
+### Expected: 401 Unauthorized - {"error": "API key is required"}
+### STATUS: FIXED - API key validation now enforced
+# @name forceCloseNoApiKey
+POST {{baseUrl}}/campaigns/force-close-browsers
+
+###############################################################################
+### 5. CAMPAIGN PROGRESS TESTS
+###############################################################################
+
+### TC-PROGRESS-001: Get Campaign Progress Successfully
+### Expected: 200 OK with full progress object
+# @name getProgress
+GET {{baseUrl}}/campaigns/{{campaignId}}/progress
+X-API-Key: {{apiKey}}
+
+### TC-PROGRESS-002: Get Progress - Invalid API Key
+### Expected: 401 Unauthorized
+# @name getProgressInvalidKey
+GET {{baseUrl}}/campaigns/{{campaignId}}/progress
+X-API-Key: {{invalidApiKey}}
+
+### TC-PROGRESS-003: Get Progress - Campaign Not Found
+### Expected: 404 Not Found
+# @name getProgressNotFound
+GET {{baseUrl}}/campaigns/{{nonExistentCampaignId}}/progress
+X-API-Key: {{apiKey}}
+
+###############################################################################
+### 6. CAMPAIGN CRUD TESTS
+###############################################################################
+
+### TC-GET-001: Get Campaign Details
+### Expected: 200 OK with campaign data
+# @name getCampaign
+GET {{baseUrl}}/campaigns/{{campaignId}}
+X-API-Key: {{apiKey}}
+
+### TC-LIST-001: List All Campaigns
+### Expected: 200 OK with campaigns array
+# @name listCampaigns
+GET {{baseUrl}}/campaigns?page=1&pageSize=50
+X-API-Key: {{apiKey}}
+
+### TC-CREATE-001: Create New Campaign
+### Expected: 201 Created (NOT 200!)
+# @name createCampaign
+POST {{baseUrl}}/campaigns
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "Test Workflow Campaign",
+  "description": "Campaign for workflow testing",
+  "campaignTemplateId": 1,
+  "messageContent": "Hello {Name}, this is a test!",
+  "totalContacts": 10,
+  "useGenderTemplates": false,
+  "maleContent": "",
+  "femaleContent": ""
+}
+
+### TC-DELETE-001: Delete Campaign
+### Precondition: Campaign is NOT running
+### Expected: 200 OK - {"message": "Campaign deleted successfully"}
+# @name deleteCampaign
+DELETE {{baseUrl}}/campaigns/{{campaignId}}
+X-API-Key: {{apiKey}}
+
+### TC-DELETE-002: Delete Running Campaign
+### Precondition: Campaign status is "Running"
+### Expected: 400 Bad Request - {"error": "Cannot delete a running campaign. Stop it first."}
+# @name deleteRunningCampaign
+DELETE {{baseUrl}}/campaigns/{{campaignId}}
+X-API-Key: {{apiKey}}
+
+###############################################################################
+### 7. WORKFLOW INTEGRATION TESTS
+###############################################################################
+
+### ==================== TC-WORKFLOW-001: Full Workflow ====================
+### Execute these in order to test the complete workflow
+
+### Step 1: Create test campaign
+### Expected: 201 Created
+# @name workflow_createCampaign
+POST {{baseUrl}}/campaigns
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "Workflow Integration Test",
+  "description": "Test full workflow cycle",
+  "campaignTemplateId": 1,
+  "messageContent": "Hello!",
+  "totalContacts": 5,
+  "useGenderTemplates": false
+}
+
+### Step 2: Start the campaign
+### Expected: 200 OK with status: "Running"
+# @name workflow_start
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### Step 3: Check progress
+### Expected: 200 OK with progress data
+# @name workflow_checkProgress
+GET {{baseUrl}}/campaigns/{{campaignId}}/progress
+X-API-Key: {{apiKey}}
+
+### Step 4: Pause the campaign
+### Expected: 200 OK with status: "Paused"
+# @name workflow_pause
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 2
+}
+
+### Step 5: Resume (start again)
+### Expected: 200 OK with status: "Running"
+# @name workflow_resume
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### Step 6: Stop the campaign
+### Expected: 200 OK with status: "Stopped"
+# @name workflow_stop
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 3
+}
+
+### Step 7: Verify cannot restart stopped campaign
+### Expected: 400 Bad Request - "Stopped campaigns cannot be restarted. Create a new campaign instead."
+# @name workflow_cannotRestart
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+###############################################################################
+### 8. ERROR SCENARIOS (Additional Coverage)
+###############################################################################
+
+### TC-START-005: Start Already Running Campaign
+### Precondition: Campaign status is "Running"
+### Expected: 400 Bad Request - {"error": "Campaign is already running"}
+# @name startAlreadyRunning
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto"
+}
+
+### TC-START-006: Start Stopped Campaign
+### Precondition: Campaign status is "Stopped"
+### Expected: 400 Bad Request - {"error": "Stopped campaigns cannot be restarted..."}
+# @name startStoppedCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto"
+}
+
+### TC-START-007: Start Completed Campaign
+### Precondition: Campaign status is "Completed"
+### Expected: 400 Bad Request - {"error": "Campaign has already completed"}
+# @name startCompletedCampaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto"
+}
+
+### TC-START-008: Start Campaign - No Pending Contacts
+### Precondition: User has no pending selected contacts
+### Expected: 400 Bad Request - {"error": "No pending contacts found for this user"}
+# @name startNoPendingContacts
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto"
+}

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/SaasUntilNoe - Copy/**)",
+      "Bash(dir Views)",
+      "Bash(dir Controllers)",
+      "Bash(dotnet ef migrations add AddTimingControlTables --context SaaSDbContext)",
+      "Bash(dotnet ef database update --context SaaSDbContext)",
+      "Bash(dotnet ef database update --context SaaSDbContext --project \"..\\WhatsApp.Shared\")",
+      "Bash(dotnet ef migrations list --context SaaSDbContext --project \"..\\WhatsApp.Shared\")",
+      "Bash(dotnet build --no-incremental)",
+      "Bash(dotnet ef migrations list --context SaaSDbContext)",
+      "Bash(dotnet ef database update --context SaaSDbContext --connection \"Server=DESKTOP-8607E9R;Database=WhatsAppSaaS;User ID=sa;Password=1111;MultipleActiveResultSets=true;TrustServerCertificate=True\")",
+      "Bash(dotnet ef database update 20251018202136_AddTimingControlTables --context SaaSDbContext --connection \"Server=DESKTOP-8607E9R;Database=WhatsAppSaaS;User ID=sa;Password=1111;MultipleActiveResultSets=true;TrustServerCertificate=True\")",
+      "Bash(sqlcmd -S DESKTOP-8607E9R -U sa -P 1111 -d WhatsAppSaaS -i \"E:\\SaasUntilNoe - Copy\\CreateTimingControlTables.sql\" -o \"E:\\SaasUntilNoe - Copy\\CreateTimingControlTables_output.txt\")",
+      "Bash(sqlcmd -S DESKTOP-8607E9R -U sa -P 1111 -d WhatsAppSaaS -i \"E:\\SaasUntilNoe - Copy\\SeedTimingControlSampleData.sql\" -o \"E:\\SaasUntilNoe - Copy\\SeedTimingControlSampleData_output.txt\")",
+      "Bash(awk 'NR>=2636 && NR<=2650' \"E:\\SaasUntilNoe - Copy\\morsel-tabs\\text-message\\index.html\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

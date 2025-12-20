@@ -1,0 +1,17 @@
+{
+  "/whatsapp-api": {
+    "target": "http://localhost:5036",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/whatsapp-api": "/api"
+    }
+  },
+  "/api": {
+    "target": "http://localhost:7000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

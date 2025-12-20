@@ -1,0 +1,192 @@
+@model IEnumerable<CampaignTemplate>
+
+@{
+    ViewData["Title"] = "Campaign Templates";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Campaign Templates</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Create New Template
+    </a>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Filter by Category</h6>
+                <div class="btn-group" role="group">
+                    <a asp-action="Index" class="btn @(string.IsNullOrEmpty(ViewBag.SelectedCategory) ? "btn-primary" : "btn-outline-primary") btn-sm">All</a>
+                    @if (ViewBag.Categories != null)
+                    {
+                        @foreach (var category in (IEnumerable<string>)ViewBag.Categories)
+                        {
+                            <a asp-action="Index" asp-route-category="@category"
+                               class="btn @(ViewBag.SelectedCategory == category ? "btn-primary" : "btn-outline-primary") btn-sm">
+                                @category
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var template in Model)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">@template.Name</h6>
+                                @if (template.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <small class="text-muted">Category: @template.Category</small>
+                                </p>
+                                @if (!string.IsNullOrEmpty(template.Description))
+                                {
+                                    <p class="card-text">@template.Description</p>
+                                }
+                                <div class="message-preview">
+                                    <strong>Message:</strong>
+                                    <div class="border rounded p-2 mt-1" style="background-color: #f8f9fa; max-height: 100px; overflow-y: auto;">
+                                        @template.MessageContent
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(template.ImageUrl))
+                                {
+                                    <p class="card-text mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-image me-1"></i>Has image attachment
+                                        </small>
+                                    </p>
+                                }
+                            </div>
+                            <div class="card-footer">
+                                <button type="button" class="btn btn-success btn-sm w-100 mb-2 use-template-btn"
+                                        data-id="@template.Id"
+                                        data-name="@template.Name"
+                                        data-content="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(template.MessageContent))"
+                                        data-male="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(template.MaleContent ?? ""))"
+                                        data-female="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(template.FemaleContent ?? ""))"
+                                        data-description="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(template.Description ?? ""))">
+                                    <i class="bi bi-check2-square"></i> Use Template
+                                </button>
+                                <div class="btn-group w-100" role="group">
+                                    <a asp-action="Details" asp-route-id="@template.Id" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@template.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-warning toggle-active"
+                                            data-id="@template.Id" data-active="@template.IsActive.ToString().ToLower()">
+                                        <i class="bi bi-toggle-@(template.IsActive ? "on" : "off")"></i>
+                                    </button>
+                                    <a asp-action="Delete" asp-route-id="@template.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-envelope text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">No templates found</h4>
+                @if (!string.IsNullOrEmpty(ViewBag.SelectedCategory))
+                {
+                    <p class="text-muted">No templates found in the "@ViewBag.SelectedCategory" category.</p>
+                    <a asp-action="Index" class="btn btn-secondary me-2">View All Templates</a>
+                }
+                else
+                {
+                    <p class="text-muted">Create your first campaign template to get started.</p>
+                }
+                <a asp-action="Create" class="btn btn-primary">Create Template</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-active');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const templateId = this.dataset.id;
+                    const isActive = this.dataset.active === 'true';
+
+                    fetch('@Url.Action("ToggleActive")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({ id: templateId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the template status.');
+                    });
+                });
+            });
+
+            // Handle "Use Template" button clicks
+            const useTemplateButtons = document.querySelectorAll('.use-template-btn');
+
+            useTemplateButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    try {
+                        const templateData = {
+                            id: this.dataset.id,
+                            name: this.dataset.name,
+                            content: JSON.parse(this.dataset.content),
+                            male: JSON.parse(this.dataset.male),
+                            female: JSON.parse(this.dataset.female),
+                            description: JSON.parse(this.dataset.description)
+                        };
+
+                        // Store template data in sessionStorage
+                        sessionStorage.setItem('selectedTemplate', JSON.stringify(templateData));
+
+                        // Navigate to Create page
+                        window.location.href = '@Url.Action("Create")';
+                    } catch (error) {
+                        console.error('Error parsing template data:', error);
+                        alert('An error occurred while loading the template.');
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,291 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "WhatsApp API v2",
+		"description": "WhatsApp Web Automation API with randomized delays and breaks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5036/api/whatsapp"
+		}
+	],
+	"item": [
+		{
+			"name": "Status & Control",
+			"item": [
+				{
+					"name": "1 - Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["status"]
+						},
+						"description": "Check if browser is open and WhatsApp is logged in"
+					}
+				},
+				{
+					"name": "2 - Initialize Chrome",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"browserType\": \"Chrome\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/init",
+							"host": ["{{baseUrl}}"],
+							"path": ["init"]
+						},
+						"description": "Initialize Chrome browser and navigate to WhatsApp Web"
+					}
+				},
+				{
+					"name": "2b - Initialize Firefox",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"browserType\": \"Firefox\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/init",
+							"host": ["{{baseUrl}}"],
+							"path": ["init"]
+						},
+						"description": "Initialize Firefox browser and navigate to WhatsApp Web"
+					}
+				},
+				{
+					"name": "3 - Close Browser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/close",
+							"host": ["{{baseUrl}}"],
+							"path": ["close"]
+						},
+						"description": "Close the browser and end the session"
+					}
+				}
+			]
+		},
+		{
+			"name": "Send Messages",
+			"item": [
+				{
+					"name": "4 - Send Text Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Hello! This is a test message.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/send",
+							"host": ["{{baseUrl}}"],
+							"path": ["send"]
+						},
+						"description": "Send a text message to a single contact"
+					}
+				},
+				{
+					"name": "5 - Send With Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Check this image!\",\n    \"attachments\": [\n        {\n            \"base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n            \"fileName\": \"test.png\",\n            \"mediaType\": \"image\",\n            \"caption\": \"Sample image\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/send",
+							"host": ["{{baseUrl}}"],
+							"path": ["send"]
+						},
+						"description": "Send a message with an image attachment"
+					}
+				},
+				{
+					"name": "6 - Send With Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Here is the document.\",\n    \"attachments\": [\n        {\n            \"base64\": \"SGVsbG8gV29ybGQh\",\n            \"fileName\": \"file.txt\",\n            \"mediaType\": \"document\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/send",
+							"host": ["{{baseUrl}}"],
+							"path": ["send"]
+						},
+						"description": "Send a message with a document attachment"
+					}
+				}
+			]
+		},
+		{
+			"name": "Bulk Messages (Blocking)",
+			"item": [
+				{
+					"name": "7 - Send Bulk (Simple)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contacts\": [\n        {\n            \"id\": 1,\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"id\": 2,\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a personalized message.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/send-bulk",
+							"host": ["{{baseUrl}}"],
+							"path": ["send-bulk"]
+						},
+						"description": "Send bulk messages with default settings. Uses placeholders: {{name}}, {{firstName}}, {{phone}}"
+					}
+				},
+				{
+					"name": "8 - Send Bulk (With Settings)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contacts\": [\n        {\n            \"id\": 1,\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"id\": 2,\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        },\n        {\n            \"id\": 3,\n            \"phone\": \"+1122334455\",\n            \"name\": \"Bob Wilson\"\n        }\n    ],\n    \"message\": \"Hi {{firstName}}! How are you?\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 10,\n        \"maxDelaySeconds\": 30\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"minBreakAfterMessages\": 3,\n        \"maxBreakAfterMessages\": 7,\n        \"minBreakMinutes\": 1,\n        \"maxBreakMinutes\": 3\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/send-bulk",
+							"host": ["{{baseUrl}}"],
+							"path": ["send-bulk"]
+						},
+						"description": "Send bulk messages with custom delay and break settings. Break occurs after random 3-7 messages, duration is random 1-3 minutes."
+					}
+				}
+			]
+		},
+		{
+			"name": "Bulk Operations (Background)",
+			"description": "Background bulk operations with pause/resume/stop control",
+			"item": [
+				{
+					"name": "9 - Start Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contacts\": [\n        {\n            \"id\": 1,\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"id\": 2,\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        },\n        {\n            \"id\": 3,\n            \"phone\": \"+1122334455\",\n            \"name\": \"Bob Wilson\"\n        },\n        {\n            \"id\": 4,\n            \"phone\": \"+5566778899\",\n            \"name\": \"Alice Brown\"\n        },\n        {\n            \"id\": 5,\n            \"phone\": \"+9988776655\",\n            \"name\": \"Charlie Davis\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a bulk message.\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 30,\n        \"maxDelaySeconds\": 60\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"minBreakAfterMessages\": 2,\n        \"maxBreakAfterMessages\": 4,\n        \"minBreakMinutes\": 1,\n        \"maxBreakMinutes\": 3\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bulk/start",
+							"host": ["{{baseUrl}}"],
+							"path": ["bulk", "start"]
+						},
+						"description": "Start a bulk send operation in the background. Returns immediately with operation ID. Use status/pause/resume/stop endpoints to control."
+					}
+				},
+				{
+					"name": "10 - Get Bulk Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bulk/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["bulk", "status"]
+						},
+						"description": "Get current bulk operation status including progress, sent/failed counts, and operation state."
+					}
+				},
+				{
+					"name": "11 - Pause Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bulk/pause",
+							"host": ["{{baseUrl}}"],
+							"path": ["bulk", "pause"]
+						},
+						"description": "Pause the currently running bulk operation. Use /resume to continue."
+					}
+				},
+				{
+					"name": "12 - Resume Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bulk/resume",
+							"host": ["{{baseUrl}}"],
+							"path": ["bulk", "resume"]
+						},
+						"description": "Resume a paused bulk operation."
+					}
+				},
+				{
+					"name": "13 - Stop Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bulk/stop",
+							"host": ["{{baseUrl}}"],
+							"path": ["bulk", "stop"]
+						},
+						"description": "Stop the current bulk operation completely. Cannot be resumed after stopping."
+					}
+				}
+			]
+		}
+	]
+}

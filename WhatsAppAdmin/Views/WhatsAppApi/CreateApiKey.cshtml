@@ -1,0 +1,117 @@
+@model WhatsAppAdmin.Controllers.CreateApiKeyViewModel
+
+@{
+    ViewData["Title"] = "Create API Key";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-key me-2"></i>Create New API Key
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateApiKey" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Important:</strong> Your API key will be shown only once after creation. Make sure to save it securely.
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">
+                            <i class="bi bi-tag me-2"></i>API Key Name
+                        </label>
+                        <input asp-for="Name" class="form-control" placeholder="e.g., Production API, Development API" required />
+                        <div class="form-text">Choose a descriptive name to help you identify this API key.</div>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SubscriptionId" class="form-label">
+                            <i class="bi bi-credit-card me-2"></i>Subscription Plan
+                        </label>
+                        <select asp-for="SubscriptionId" class="form-select" required>
+                            <option value="">-- Select a Subscription Plan --</option>
+                            @if (ViewBag.Subscriptions != null)
+                            {
+                                @foreach (var subscription in (IEnumerable<dynamic>)ViewBag.Subscriptions)
+                                {
+                                    <option value="@subscription.SubscriptionId">
+                                        @subscription.SubscriptionPlan.Name - @subscription.SubscriptionPlan.MaxMessagesPerDay messages/day ($@subscription.SubscriptionPlan.Price)
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Select the subscription plan that will be associated with this API key.</div>
+                        <span asp-validation-for="SubscriptionId" class="text-danger"></span>
+                    </div>
+
+                    @if (ViewBag.Subscriptions == null || !((IEnumerable<dynamic>)ViewBag.Subscriptions).Any())
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>No Subscriptions Available:</strong> You need an active subscription to create API keys.
+                            <a asp-controller="UserSubscriptions" asp-action="Index" class="alert-link">Manage your subscriptions</a>.
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h6><i class="bi bi-shield-check me-2"></i>Security Features</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Rate limiting based on subscription plan</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Usage tracking and analytics</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Secure 64-character key generation</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Revocation capability</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary" @(ViewBag.Subscriptions == null || !((IEnumerable<dynamic>)ViewBag.Subscriptions).Any() ? "disabled" : "")>
+                            <i class="bi bi-plus-circle me-2"></i>Create API Key
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- API Key Guidelines Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-book me-2"></i>API Usage Guidelines
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-check-square me-2"></i>Best Practices</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-dot"></i>Keep your API keys secure and private</li>
+                            <li><i class="bi bi-dot"></i>Use environment variables in production</li>
+                            <li><i class="bi bi-dot"></i>Regularly rotate your API keys</li>
+                            <li><i class="bi bi-dot"></i>Monitor usage and quotas</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-code-square me-2"></i>Integration Example</h6>
+                        <pre class="bg-light p-2 rounded"><code>curl -X POST "https://api.yourapp.com/send" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "+1234567890", "message": "Hello!"}'</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

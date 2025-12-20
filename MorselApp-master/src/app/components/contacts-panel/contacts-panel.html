@@ -1,0 +1,338 @@
+<div class="contacts-panel">
+  <!-- Header -->
+  <div class="panel-header">
+    <h3>Contacts List</h3>
+    @if (selectedCount() > 0) {
+      <span class="selection-badge">
+        {{ selectedCount() }} selected
+      </span>
+    }
+  </div>
+
+  <!-- Selection Bar - Shows when contacts are selected -->
+  @if (selectedCount() > 0) {
+    <div class="selection-bar">
+      <div class="selection-info">
+        <span class="selection-icon">OK</span>
+        <span><strong>{{ selectedCount() }}</strong> contacts selected</span>
+        @if (filteredSelectedCount() !== selectedCount()) {
+          <span class="selection-detail">({{ filteredSelectedCount() }} in current filter)</span>
+        }
+      </div>
+      <div class="selection-actions">
+        <button class="btn btn-sm btn-danger" (click)="confirmBulkDelete()" [disabled]="isDeleting()">
+          @if (isDeleting()) {
+            <span class="btn-spinner"></span> Deleting...
+          } @else {
+            Delete Selected
+          }
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="clearSelection()">
+          Clear Selection
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteConfirm()) {
+    <div class="modal-overlay" (click)="cancelBulkDelete()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4>Confirm Delete</h4>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete <strong>{{ selectedCount() }}</strong> contacts?</p>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="cancelBulkDelete()">Cancel</button>
+          <button class="btn btn-danger" (click)="bulkDeleteContacts()">Delete</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="btn btn-outline" (click)="clearContacts()">Clear</button>
+    <button class="btn btn-outline" (click)="exportContacts()">Export</button>
+    <button class="btn btn-primary" (click)="importContacts()" [disabled]="isImporting()">
+      @if (isImporting()) {
+        <span class="btn-spinner"></span> Importing...
+      } @else {
+        Import
+      }
+    </button>
+  </div>
+
+  <!-- Contact Statistics -->
+  <div class="statistics-section">
+    <div class="section-header">
+      <span>📊 Contact Statistics</span>
+      <button class="refresh-btn" [class.spinning]="isLoading()" (click)="refreshStatistics()" [disabled]="isLoading()">🔄</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">Total</span>
+        <span class="stat-value blue">{{ statistics().total }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Pending</span>
+        <span class="stat-value orange">{{ statistics().pending }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Sent</span>
+        <span class="stat-value green">{{ statistics().sent }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Delivered</span>
+        <span class="stat-value teal">{{ statistics().delivered }}</span>
+      </div>
+      <div class="stat-box clickable" (click)="resendAllFailed()" [class.disabled]="isResendingAllFailed() || statistics().failed === 0" title="Click to resend all failed contacts">
+        <span class="stat-label">Failed</span>
+        <span class="stat-value red">
+          @if (isResendingAllFailed()) {
+            <span class="mini-spinner"></span>
+          } @else {
+            {{ statistics().failed }}
+          }
+        </span>
+        @if (statistics().failed > 0) {
+          <span class="resend-hint">🔄 Click to resend</span>
+        }
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Issues</span>
+        <span class="stat-value purple">{{ statistics().issues }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Blocked</span>
+        <span class="stat-value darkred">{{ statistics().blocked }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Responded</span>
+        <span class="stat-value cyan">{{ statistics().responded }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Not Int.</span>
+        <span class="stat-value gray">{{ statistics().notInterested }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    @for (filter of filters; track filter) {
+      <button
+        class="filter-tab"
+        [class.active]="selectedFilter() === filter"
+        (click)="setFilter(filter)"
+      >
+        <span class="filter-icon">{{ filterIcons[filter] }}</span>
+        {{ filterLabels[filter] }}
+      </button>
+    }
+  </div>
+
+  <!-- Contacts Table -->
+  <div class="table-container">
+    <table class="contacts-table">
+      <thead>
+        <tr>
+          <th class="checkbox-col">
+            <div class="checkbox-wrapper" (click)="$event.stopPropagation()">
+              <input
+                type="checkbox"
+                [checked]="allVisibleSelected"
+                [indeterminate]="someVisibleSelected"
+                (change)="toggleSelectAll()"
+                class="header-checkbox"
+              />
+              <button class="checkbox-dropdown-btn" (click)="toggleSelectOptions(); $event.stopPropagation()">
+                <span class="dropdown-arrow">v</span>
+              </button>
+              @if (showSelectOptions) {
+                <div class="checkbox-dropdown" (click)="$event.stopPropagation()">
+                  <button class="dropdown-item" (click)="selectAllVisible()">
+                    Select page ({{ contacts().length }})
+                  </button>
+                  <button class="dropdown-item" (click)="selectAllFiltered()">
+                    Select all filtered ({{ totalContacts() }})
+                  </button>
+                  <button class="dropdown-item" (click)="deselectAllVisible()">
+                    Deselect page
+                  </button>
+                  @if (selectedCount() > 0) {
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" (click)="clearSelection()">
+                      Clear all selection ({{ selectedCount() }})
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </th>
+          <th>FIRST NAME</th>
+          <th>ARABIC NAME</th>
+          <th>ENGLISH NAME</th>
+          <th>NUMBER</th>
+          <th>GENDER</th>
+          <th>STATUS</th>
+          <th style="min-width: 200px; width: 200px;">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (contact of contacts(); track contact.id) {
+          <tr [class.editing-row]="isEditing(contact.id)" [class.selected-row]="contact.selected">
+            <td class="checkbox-col">
+              <input
+                type="checkbox"
+                [checked]="contact.selected"
+                [disabled]="contact.status !== 'Pending'"
+                (change)="toggleSelect(contact.id)"
+                [title]="contact.status !== 'Pending' ? 'Only Pending contacts can be selected' : 'Select for campaign'"
+              />
+            </td>
+            <!-- First Name - Click to edit -->
+            <td class="editable-cell" (click)="startEdit(contact)">
+              @if (isEditing(contact.id)) {
+                <input
+                  type="text"
+                  class="edit-input"
+                  [value]="editForm().Name"
+                  (input)="updateEditField('Name', $any($event.target).value)"
+                  (keydown.enter)="saveEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  placeholder="First Name"
+                  autofocus
+                />
+              } @else {
+                <span class="cell-text">{{ contact.firstName }}</span>
+              }
+            </td>
+            <!-- Arabic Name - Click to edit -->
+            <td class="editable-cell" (click)="startEdit(contact)">
+              @if (isEditing(contact.id)) {
+                <input
+                  type="text"
+                  class="edit-input"
+                  [value]="editForm().ArabicName"
+                  (input)="updateEditField('ArabicName', $any($event.target).value)"
+                  (keydown.enter)="saveEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  placeholder="Arabic Name"
+                />
+              } @else {
+                <span class="cell-text">{{ contact.arabicName }}</span>
+              }
+            </td>
+            <!-- English Name - Click to edit -->
+            <td class="editable-cell" (click)="startEdit(contact)">
+              @if (isEditing(contact.id)) {
+                <input
+                  type="text"
+                  class="edit-input"
+                  [value]="editForm().EnglishName"
+                  (input)="updateEditField('EnglishName', $any($event.target).value)"
+                  (keydown.enter)="saveEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  placeholder="English Name"
+                />
+              } @else {
+                <span class="cell-text">{{ contact.englishName }}</span>
+              }
+            </td>
+            <!-- Number - Click to edit -->
+            <td class="editable-cell" (click)="startEdit(contact)">
+              @if (isEditing(contact.id)) {
+                <input
+                  type="text"
+                  class="edit-input"
+                  [value]="editForm().Phone"
+                  (input)="updateEditField('Phone', $any($event.target).value)"
+                  (keydown.enter)="saveEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  placeholder="Number"
+                />
+              } @else {
+                <span class="cell-text">{{ contact.number }}</span>
+              }
+            </td>
+            <!-- Gender - Click to edit -->
+            <td class="editable-cell" (click)="startEdit(contact)">
+              @if (isEditing(contact.id)) {
+                <input
+                  type="text"
+                  class="edit-input gender-input"
+                  [value]="editForm().Gender"
+                  (input)="onGenderInput($any($event.target).value)"
+                  (keydown.enter)="saveEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  placeholder="M/F"
+                  maxlength="1"
+                />
+              } @else {
+                <span class="gender-icon" [class.male]="contact.gender === 'M'" [class.female]="contact.gender === 'F'">
+                  {{ getGenderIcon(contact.gender) }} {{ contact.gender }}
+                </span>
+              }
+            </td>
+            <!-- Status -->
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(contact.status)">
+                {{ contact.status }}
+              </span>
+            </td>
+            <!-- Actions -->
+            <td class="actions-col" style="min-width: 200px; width: 200px;">
+              @if (isEditing(contact.id) && isSaving()) {
+                <span class="mini-spinner"></span>
+              }
+              <button class="action-icon resend" title="Resend" (click)="resendContact(contact.id)">🔄</button>
+              <button class="action-icon responded" title="Mark Responded" (click)="markResponded(contact.id)">💬</button>
+              <button class="action-icon not-interested" title="Not Interested" (click)="markNotInterested(contact.id)">🚫</button>
+              <button class="action-icon delete" title="Delete" (click)="deleteContact(contact.id)">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <span class="pagination-info">
+      Showing {{ contacts().length }} of {{ totalContacts() }} contacts (Page {{ currentPage() }} of {{ totalPages() }})
+    </span>
+    <div class="pagination-controls">
+      <button class="page-btn" (click)="setPage(1)" [disabled]="currentPage() === 1">«</button>
+      <button class="page-btn" (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1">‹</button>
+      @for (page of getPagesArray(); track page) {
+        <button
+          class="page-btn"
+          [class.active]="currentPage() === page"
+          (click)="setPage(page)"
+        >
+          {{ page }}
+        </button>
+      }
+      <button class="page-btn" (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">›</button>
+      <button class="page-btn" (click)="setPage(totalPages())" [disabled]="currentPage() === totalPages()">»</button>
+    </div>
+    <div class="page-size">
+      <span>Per page:</span>
+      <select [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+    </div>
+  </div>
+</div>

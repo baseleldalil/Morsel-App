@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "WhatsApp Bulk Operations",
+		"description": "Collection for controlling bulk WhatsApp message operations with Start, Pause, Resume, and Stop functionality.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5036",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1 - Start Bulk Operation",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        },\n        {\n            \"phone\": \"+1122334455\",\n            \"name\": \"Bob Wilson\"\n        },\n        {\n            \"phone\": \"+5566778899\",\n            \"name\": \"Alice Brown\"\n        },\n        {\n            \"phone\": \"+9988776655\",\n            \"name\": \"Charlie Davis\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a bulk message.\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 30,\n        \"maxDelaySeconds\": 60\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"breakAfterMessages\": 3,\n        \"minBreakMinutes\": 1,\n        \"maxBreakMinutes\": 2\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/start",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"start"
+					]
+				},
+				"description": "Start a bulk send operation in the background.\n\n**Request Body:**\n- `contacts`: Array of contacts with phone and name\n- `message`: Message template (use {{name}} for personalization)\n- `delaySettings`: Random delay between messages (seconds)\n- `breakSettings`: Break configuration after N messages\n\n**Response:**\n- Returns operation ID and initial status\n- Operation runs in background\n- Use /status to monitor progress"
+			}
+		},
+		{
+			"name": "2 - Get Bulk Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/status",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"status"
+					]
+				},
+				"description": "Get current bulk operation status.\n\n**Response includes:**\n- `operationId`: Unique operation identifier\n- `status`: Idle | Running | Paused | Stopped | Completed\n- `totalContacts`: Total number of contacts\n- `processedContacts`: Number processed so far\n- `sent`: Successfully sent count\n- `failed`: Failed count\n- `progressPercent`: Progress percentage\n- `remainingContacts`: How many left\n- `breaksTaken`: Number of breaks taken\n- `message`: Current status message"
+			}
+		},
+		{
+			"name": "3 - Pause Bulk Operation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/pause",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"pause"
+					]
+				},
+				"description": "Pause the currently running bulk operation.\n\n**Behavior:**\n- Operation will pause after current message completes\n- State is preserved\n- Use /resume to continue\n- Use /status to check paused state\n\n**Returns error if:**\n- No operation is running\n- Operation is already paused\n- Operation is stopped/completed"
+			}
+		},
+		{
+			"name": "4 - Resume Bulk Operation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/resume",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"resume"
+					]
+				},
+				"description": "Resume a paused bulk operation.\n\n**Behavior:**\n- Continues from where it was paused\n- Maintains sent/failed counts\n- Continues with remaining contacts\n\n**Returns error if:**\n- No operation is paused\n- Operation is running/stopped/completed"
+			}
+		},
+		{
+			"name": "5 - Stop Bulk Operation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/stop",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"stop"
+					]
+				},
+				"description": "Stop the current bulk operation completely.\n\n**Behavior:**\n- Cancels the operation immediately\n- Cannot be resumed after stopping\n- Returns final sent/failed counts\n- Must start a new operation to send more\n\n**Returns error if:**\n- No active operation to stop"
+			}
+		},
+		{
+			"name": "Example - Start with Attachments",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! Please check the attached document.\",\n    \"attachments\": [\n        {\n            \"base64\": \"SGVsbG8gV29ybGQh\",\n            \"fileName\": \"info.txt\",\n            \"mediaType\": \"document\"\n        }\n    ],\n    \"delaySettings\": {\n        \"minDelaySeconds\": 45,\n        \"maxDelaySeconds\": 90\n    },\n    \"breakSettings\": {\n        \"enabled\": false\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/bulk/start",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"bulk",
+						"start"
+					]
+				},
+				"description": "Example: Start bulk operation with document attachments.\n\n**Attachment Types:**\n- `image`: For images (png, jpg, etc.)\n- `video`: For video files\n- `document`: For documents (pdf, txt, etc.)\n\n**Note:** base64 should contain the file content encoded in base64 format."
+			}
+		}
+	]
+}

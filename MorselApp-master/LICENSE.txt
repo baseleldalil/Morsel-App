@@ -1,0 +1,16 @@
+WhatsApp Sender Desktop Application
+End User License Agreement
+
+Copyright (c) 2024 WhatsApp Sender Team
+
+This software is provided for authorized use only.
+
+By installing and using this software, you agree to the following terms:
+
+1. This software is provided "as is" without warranty of any kind.
+2. The software is intended for legitimate business communication purposes.
+3. Users must comply with WhatsApp's terms of service.
+4. Unauthorized distribution of this software is prohibited.
+5. The authors are not responsible for any misuse of this software.
+
+For support, please contact the development team.

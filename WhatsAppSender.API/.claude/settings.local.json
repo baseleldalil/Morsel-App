@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/SaasUntilNoe/morsel-tabs/morsel-tabsV3/morsel-tabs/**)",
+      "Bash(dotnet build)",
+      "Bash(dir:*)",
+      "Read(//e/SaasUntilNoe/**)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet ef database update:*)",
+      "Bash(sqlcmd:*)",
+      "Bash(dotnet ef migrations remove:*)",
+      "Read(//e/SaasUntilNoe - Copy/morsel-tabs/**)",
+      "Read(//e/SaasUntilNoe - Copy/**)",
+      "Bash(python convert_csv_to_excel.py)",
+      "Bash(findstr:*)",
+      "Bash(csc test_progressive_delays.cs:*)",
+      "Bash(test_progressive_delays.exe)",
+      "Bash(mkdir:*)",
+      "Bash(dotnet build:*)",
+      "Bash(where:*)",
+      "Bash(timeout 15 dotnet run:*)",
+      "Bash(timeout:*)",
+      "Bash(cat:*)",
+      "Bash(python:*)",
+      "Bash(npm start)",
+      "Bash(npx ng serve:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,377 @@
+{
+	"info": {
+		"_postman_id": "f8e7d6c5-b4a3-9281-0fed-cba987654321",
+		"name": "WhatsApp API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1 - Get Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"status"
+					]
+				}
+			}
+		},
+		{
+			"name": "2 - Initialize Chrome",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"browserType\": \"Chrome\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"init"
+					]
+				}
+			}
+		},
+		{
+			"name": "2b - Initialize Firefox",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"browserType\": \"Firefox\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"init"
+					]
+				}
+			}
+		},
+		{
+			"name": "3 - Close Browser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/close",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"close"
+					]
+				}
+			}
+		},
+		{
+			"name": "4 - Send Text Message",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Hello! This is a test message.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			}
+		},
+		{
+			"name": "5 - Send With Image",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Check this image!\",\n    \"attachments\": [\n        {\n            \"base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n            \"fileName\": \"test.png\",\n            \"mediaType\": \"image\",\n            \"caption\": \"Sample image\"\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			}
+		},
+		{
+			"name": "6 - Send With Document",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Here is the document.\",\n    \"attachments\": [\n        {\n            \"base64\": \"SGVsbG8gV29ybGQh\",\n            \"fileName\": \"file.txt\",\n            \"mediaType\": \"document\"\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			}
+		},
+		{
+			"name": "7 - Send Bulk Messages",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a personalized message.\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/send-bulk",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"send-bulk"
+					]
+				}
+			}
+		},
+		{
+			"name": "8 - Send Bulk With Settings",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hi {{firstName}}! How are you?\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 10,\n        \"maxDelaySeconds\": 20\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"minBreakAfterMessages\": 3,\n        \"maxBreakAfterMessages\": 7,\n        \"minBreakMinutes\": 1,\n        \"maxBreakMinutes\": 3\n    }\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5036/api/whatsapp/send-bulk",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"whatsapp",
+						"send-bulk"
+					]
+				}
+			}
+		},
+		{
+			"name": "Bulk Operations",
+			"item": [
+				{
+					"name": "9 - Start Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        },\n        {\n            \"phone\": \"+1122334455\",\n            \"name\": \"Bob Wilson\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a bulk message.\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 30,\n        \"maxDelaySeconds\": 60\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"minBreakAfterMessages\": 3,\n        \"maxBreakAfterMessages\": 8,\n        \"minBreakMinutes\": 2,\n        \"maxBreakMinutes\": 5\n    }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5036/api/whatsapp/bulk/start",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5036",
+							"path": [
+								"api",
+								"whatsapp",
+								"bulk",
+								"start"
+							]
+						},
+						"description": "Start a bulk send operation in the background. Use status/pause/resume/stop endpoints to control the operation."
+					}
+				},
+				{
+					"name": "10 - Get Bulk Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5036/api/whatsapp/bulk/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5036",
+							"path": [
+								"api",
+								"whatsapp",
+								"bulk",
+								"status"
+							]
+						},
+						"description": "Get current bulk operation status including progress, sent/failed counts, and operation state."
+					}
+				},
+				{
+					"name": "11 - Pause Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5036/api/whatsapp/bulk/pause",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5036",
+							"path": [
+								"api",
+								"whatsapp",
+								"bulk",
+								"pause"
+							]
+						},
+						"description": "Pause the currently running bulk operation. Use /resume to continue."
+					}
+				},
+				{
+					"name": "12 - Resume Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5036/api/whatsapp/bulk/resume",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5036",
+							"path": [
+								"api",
+								"whatsapp",
+								"bulk",
+								"resume"
+							]
+						},
+						"description": "Resume a paused bulk operation."
+					}
+				},
+				{
+					"name": "13 - Stop Bulk Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5036/api/whatsapp/bulk/stop",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5036",
+							"path": [
+								"api",
+								"whatsapp",
+								"bulk",
+								"stop"
+							]
+						},
+						"description": "Stop the current bulk operation completely. Cannot be resumed after stopping."
+					}
+				}
+			],
+			"description": "Bulk operation control endpoints for start, pause, resume, stop, and status."
+		}
+	]
+}

@@ -1,0 +1,267 @@
+<div class="campaign-progress">
+  <!-- Break Popup Overlay -->
+  @if (isOnBreak()) {
+    <div class="break-overlay">
+      <div class="break-popup">
+        <div class="break-icon">BREAK</div>
+        <h3 class="break-title">Taking a Break</h3>
+        <p class="break-message">
+          Break triggered after message <strong>#{{ breakTriggeredAtMessage() }}</strong>
+        </p>
+        <div class="break-countdown">
+          <span class="countdown-label">Resuming in</span>
+          <span class="countdown-time">{{ breakCountdown() }}</span>
+        </div>
+        <div class="break-info">
+          <span>Duration: {{ breakDurationMinutes() | number:'1.1-1' }} min</span>
+          <span>Next break: ~{{ nextBreakAfterMessages() }} msgs</span>
+        </div>
+        <div class="break-progress-bar">
+          <div class="break-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Browser Control Section -->
+  <div class="browser-control-section">
+    <div class="browser-header">
+      <h4>WhatsApp Browser</h4>
+      <span class="browser-status-badge" [class]="browserStatusClass">{{ browserStatusText }}</span>
+    </div>
+
+    <!-- Browser Selection -->
+    <div class="browser-selection">
+      <label class="browser-option">
+        <input
+          type="radio"
+          name="browserType"
+          value="Chrome"
+          [checked]="selectedBrowser() === 'Chrome'"
+          (change)="setBrowserType('Chrome')"
+          [disabled]="isBrowserOpen() || isInitializingBrowser()"
+        />
+        <span class="browser-label">
+          <span class="browser-icon">C</span>
+          Chrome
+        </span>
+      </label>
+      <label class="browser-option">
+        <input
+          type="radio"
+          name="browserType"
+          value="Firefox"
+          [checked]="selectedBrowser() === 'Firefox'"
+          (change)="setBrowserType('Firefox')"
+          [disabled]="isBrowserOpen() || isInitializingBrowser()"
+        />
+        <span class="browser-label">
+          <span class="browser-icon">F</span>
+          Firefox
+        </span>
+      </label>
+    </div>
+
+    <!-- Browser Action Buttons -->
+    <div class="browser-actions">
+      @if (!isBrowserOpen()) {
+        <button
+          class="browser-btn init"
+          (click)="initBrowser()"
+          [disabled]="isInitializingBrowser()"
+        >
+          @if (isInitializingBrowser()) {
+            <span class="spinner"></span>
+            Initializing...
+          } @else {
+            <span class="btn-icon">+</span>
+            Initialize Browser
+          }
+        </button>
+      } @else {
+        <button class="browser-btn close" (click)="closeBrowser()">
+          <span class="btn-icon">x</span>
+          Close Browser
+        </button>
+      }
+    </div>
+
+    <!-- WhatsApp Status -->
+    @if (isBrowserOpen() && !isLoggedIn()) {
+      <div class="qr-reminder">
+        <span class="qr-icon">QR</span>
+        <span>Please scan QR code in the browser window to login</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (whatsappError()) {
+      <div class="error-message">
+        {{ whatsappError() }}
+      </div>
+    }
+  </div>
+
+  <!-- Start/Running Button - Always visible -->
+  <div class="campaign-button-wrapper">
+    @if (isIdle() || isCompleted()) {
+      <button
+        class="campaign-btn start"
+        (click)="startCampaign()"
+      >
+        <span class="btn-icon">></span>
+        @if (isCompleted()) {
+          Start New Campaign
+        } @else {
+          Start Campaign
+        }
+      </button>
+    } @else if (isRunning()) {
+      <button class="campaign-btn running">
+        <span class="btn-icon">></span>
+        Running
+      </button>
+    } @else if (isPaused()) {
+      <button class="campaign-btn paused" (click)="resumeCampaign()">
+        <span class="btn-icon">></span>
+        Resume Campaign
+      </button>
+    } @else if (isStopping()) {
+      <button class="campaign-btn stopping" disabled>
+        <span class="spinner"></span>
+        Stopping...
+      </button>
+    } @else if (isInitializing()) {
+      <button class="campaign-btn initializing" disabled>
+        <span class="spinner"></span>
+        Initializing...
+      </button>
+    }
+  </div>
+
+  <!-- Progress Section -->
+  <div class="progress-section" [class.active]="isRunning() || isPaused()" [class.completed]="isCompleted()">
+    <div class="progress-header">
+      <h4>Campaign Progress</h4>
+      <div class="progress-actions">
+        <span class="status-badge" [class]="status()">{{ status() }}</span>
+        @if (isRunning()) {
+          <button class="action-btn pause" (click)="pauseCampaign()" title="Pause">||</button>
+          <button class="action-btn stop" (click)="stopCampaign()" title="Stop">[ ]</button>
+        }
+        @if (isPaused()) {
+          <button class="action-btn resume" (click)="resumeCampaign()" title="Resume">></button>
+          <button class="action-btn stop" (click)="stopCampaign()" title="Stop">[ ]</button>
+        }
+        @if (isCompleted()) {
+          <button class="action-btn reset" (click)="resetProgress()" title="Reset">R</button>
+        }
+      </div>
+    </div>
+
+    @if (isIdle() && progress().selectedContacts === 0) {
+      <!-- No campaign started yet -->
+      <div class="no-campaign-message">
+        <span class="no-campaign-icon">i</span>
+        <span>Select contacts and start a campaign to see progress</span>
+      </div>
+    } @else {
+      <!-- Progress Bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [class.running]="isRunning()"
+            [class.paused]="isPaused()"
+            [class.completed]="isCompleted()"
+            [style.width.%]="progressPercent"
+          ></div>
+        </div>
+        <div class="progress-text-row">
+          <span class="progress-text">{{ processedCount }} of {{ progress().selectedContacts }} contacts processed</span>
+          <span class="progress-percent">{{ progressPercent }}%</span>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-item sent">
+          <span class="stat-icon">OK</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ progress().sent }}</span>
+            <span class="stat-label">SENT</span>
+          </div>
+        </div>
+        <div class="stat-item delivered">
+          <span class="stat-icon">++</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ progress().delivered }}</span>
+            <span class="stat-label">DELIVERED</span>
+          </div>
+        </div>
+        <div class="stat-item pending">
+          <span class="stat-icon">...</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ progress().pending }}</span>
+            <span class="stat-label">PENDING</span>
+          </div>
+        </div>
+        <div class="stat-item failed">
+          <span class="stat-icon">X</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ progress().failed }}</span>
+            <span class="stat-label">FAILED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Stats -->
+      <div class="progress-footer">
+        <span class="footer-stat">
+          <span class="footer-icon">#</span>
+          Success Rate: <strong>{{ progress().successRate }}%</strong>
+        </span>
+        @if (isRunning() || isPaused()) {
+          <span class="footer-stat">
+            <span class="footer-icon">T</span>
+            Est. Time: <strong>{{ progress().estimatedTime }}</strong>
+          </span>
+          <span class="footer-stat">
+            <span class="footer-icon">~</span>
+            Speed: <strong>{{ progress().speed }}/min</strong>
+          </span>
+        }
+        @if (progress().breaksTaken) {
+          <span class="footer-stat">
+            <span class="footer-icon">B</span>
+            Breaks: <strong>{{ progress().breaksTaken }}</strong>
+          </span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Bottom Stats Bar -->
+  <div class="bottom-stats">
+    <div class="bottom-stat">
+      <span class="bottom-label">SELECTED CONTACTS</span>
+      <span class="bottom-value teal">{{ isRunning() || isPaused() ? progress().selectedContacts : selectedCount() }}</span>
+    </div>
+    <div class="bottom-stat">
+      <span class="bottom-label">SENT</span>
+      <span class="bottom-value green">{{ progress().sent }}</span>
+    </div>
+    <div class="bottom-stat">
+      <span class="bottom-label">FAILED</span>
+      <span class="bottom-value red">{{ progress().failed }}</span>
+    </div>
+    <div class="bottom-stat">
+      <span class="bottom-label">REMAINING</span>
+      <span class="bottom-value orange">{{ isRunning() || isPaused() ? progress().remaining : selectedCount() }}</span>
+    </div>
+    <div class="bottom-stat">
+      <span class="bottom-label">IN PROGRESS</span>
+      <span class="bottom-value blue">{{ progress().inProgress }}</span>
+    </div>
+  </div>
+</div>

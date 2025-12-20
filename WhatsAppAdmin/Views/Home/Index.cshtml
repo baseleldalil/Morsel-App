@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col">
+                        <i class="bi bi-card-list text-primary" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2">@ViewBag.TotalSubscriptions</h4>
+                        <p class="card-text">Total Subscriptions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="Subscriptions" asp-action="Index" class="btn btn-primary btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col">
+                        <i class="bi bi-people text-success" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2">@ViewBag.ActiveUserSubscriptions</h4>
+                        <p class="card-text">Active Users</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="UserSubscriptions" asp-action="Index" class="btn btn-success btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col">
+                        <i class="bi bi-envelope text-info" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2">@ViewBag.TotalTemplates</h4>
+                        <p class="card-text">Campaign Templates</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="CampaignTemplates" asp-action="Index" class="btn btn-info btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2">@ViewBag.ExpiringSubscriptions</h4>
+                        <p class="card-text">Expiring Soon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="UserSubscriptions" asp-action="Expiring" class="btn btn-warning btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a asp-controller="Subscriptions" asp-action="Create" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Create Subscription
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a asp-controller="CampaignTemplates" asp-action="Create" class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Create Template
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a asp-controller="UserSubscriptions" asp-action="Create" class="btn btn-info w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Assign User
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a asp-controller="UserSubscriptions" asp-action="Expiring" class="btn btn-warning w-100">
+                            <i class="bi bi-clock me-2"></i>Expiring Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

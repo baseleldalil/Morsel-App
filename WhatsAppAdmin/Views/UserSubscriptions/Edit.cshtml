@@ -1,0 +1,245 @@
+@model UserSubscription
+
+@{
+    ViewData["Title"] = "Edit User Subscription";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit User Subscription</h4>
+            </div>
+            <div class="card-body">
+                @* Success Message *@
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @* Error Messages *@
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="UserId" class="form-label">User ID</label>
+                                <input asp-for="UserId" class="form-control" readonly />
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                                <div class="form-text">User ID cannot be changed.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="UserEmail" class="form-label">User Email</label>
+                                <input asp-for="UserEmail" class="form-control" type="email" />
+                                <span asp-validation-for="UserEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">
+                            Password (Optional)
+                            <span class="badge bg-secondary">Leave empty to keep current</span>
+                        </label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="Enter new password (min 6 characters)" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Only enter a password if you want to change it. Leave empty to keep the current password.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SubscriptionId" class="form-label">Subscription Plan</label>
+                        <select asp-for="SubscriptionId" class="form-select" id="subscriptionSelect">
+                            <option value="">Select a subscription plan...</option>
+                            @if (ViewBag.Subscriptions != null)
+                            {
+                                @foreach (var subscription in (IEnumerable<Subscription>)ViewBag.Subscriptions)
+                                {
+                                    <option value="@subscription.Id"
+                                            data-price="@subscription.Price"
+                                            data-messages="@subscription.MaxMessagesPerDay"
+                                            data-description="@subscription.Description"
+                                            selected="@(subscription.Id == Model.SubscriptionId)">
+                                        @subscription.Name - $@subscription.Price.ToString("F2") (@subscription.MaxMessagesPerDay msgs/day)
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="SubscriptionId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="ExpiresAt" class="form-label">Expiry Date (Optional)</label>
+                                <input asp-for="ExpiresAt" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="ExpiresAt" class="text-danger"></span>
+                                <div class="form-text">Leave empty for no expiry date.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsActive" class="form-check-label">
+                                        Is Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Messages Used Today</label>
+                                <input type="text" class="form-control" value="@Model.MessagesUsedToday" readonly />
+                                <div class="form-text">Current daily message usage.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Assigned At</label>
+                                <input type="text" class="form-control" value="@Model.AssignedAt.ToString("yyyy-MM-dd HH:mm")" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Update Subscription
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Delete
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Subscription Details</h6>
+            </div>
+            <div class="card-body" id="subscriptionDetails">
+                <p class="text-muted">Select a subscription to view details...</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Usage Statistics</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Assigned:</strong> @Model.AssignedAt.ToString("MMM dd, yyyy")</p>
+                @if (Model.ExpiresAt.HasValue)
+                {
+                    <p><strong>Expires:</strong> @Model.ExpiresAt.Value.ToString("MMM dd, yyyy")</p>
+                }
+                else
+                {
+                    <p><strong>Expires:</strong> <span class="badge bg-success">Never</span></p>
+                }
+                <p><strong>Messages Today:</strong> @Model.MessagesUsedToday</p>
+                <p><strong>Last Reset:</strong> @Model.LastResetAt.ToString("MMM dd, yyyy")</p>
+                @if (Model.LastMessageSentAt != DateTime.MinValue)
+                {
+                    <p><strong>Last Message:</strong> @Model.LastMessageSentAt.ToString("MMM dd, yyyy HH:mm")</p>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Important Notes</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-key text-primary me-2"></i>
+                        <strong>Password:</strong> Only enter to change password
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        <strong>Active:</strong> Uncheck to deactivate subscription
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-clock text-muted me-2"></i>
+                        <strong>Reset:</strong> Message counts reset daily at midnight UTC
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const subscriptionSelect = document.getElementById('subscriptionSelect');
+            const subscriptionDetails = document.getElementById('subscriptionDetails');
+
+            // Function to update subscription details
+            function updateSubscriptionDetails() {
+                const selectedOption = subscriptionSelect.options[subscriptionSelect.selectedIndex];
+
+                if (selectedOption.value) {
+                    const price = selectedOption.getAttribute('data-price');
+                    const messages = selectedOption.getAttribute('data-messages');
+                    const description = selectedOption.getAttribute('data-description');
+
+                    subscriptionDetails.innerHTML = `
+                        <h6>${selectedOption.text.split(' - ')[0]}</h6>
+                        <p><strong>Price:</strong> $${price}</p>
+                        <p><strong>Daily Messages:</strong> ${messages}</p>
+                        ${description ? `<p><strong>Description:</strong> ${description}</p>` : ''}
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                This user will be able to send up to ${messages} messages per day.
+                            </small>
+                        </div>
+                    `;
+                } else {
+                    subscriptionDetails.innerHTML = '<p class="text-muted">Select a subscription to view details...</p>';
+                }
+            }
+
+            subscriptionSelect.addEventListener('change', updateSubscriptionDetails);
+
+            // Initialize on page load
+            updateSubscriptionDetails();
+
+            // Set minimum date to current date
+            const expiryInput = document.querySelector('input[name="ExpiresAt"]');
+            if (expiryInput) {
+                const now = new Date();
+                const minDateTime = now.toISOString().slice(0, 16);
+                expiryInput.min = minDateTime;
+            }
+        });
+    </script>
+}

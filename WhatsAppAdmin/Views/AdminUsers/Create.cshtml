@@ -1,0 +1,104 @@
+@model WhatsAppAdmin.Controllers.CreateAdminUserViewModel
+
+@{
+    ViewData["Title"] = "Create Admin User";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Create New Admin User</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email Address</label>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="Enter email address" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="Enter password (min 6 characters)" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="form-text">Password must be at least 6 characters long and contain uppercase, lowercase, and digit.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label">Role</label>
+                        <select asp-for="Role" class="form-select">
+                            <option value="">Select a role...</option>
+                            @foreach (var role in ViewBag.Roles as List<string>)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                        <div class="form-text">
+                            <strong>Admin:</strong> Can manage subscriptions, templates, and view reports.<br>
+                            <strong>SemiAdmin:</strong> Limited access to view-only operations.
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Create Admin User
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Role Permissions</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="text-primary">Admin Role</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="bi bi-check-circle text-success me-1"></i> Manage subscriptions</li>
+                    <li><i class="bi bi-check-circle text-success me-1"></i> Create/edit templates</li>
+                    <li><i class="bi bi-check-circle text-success me-1"></i> View user reports</li>
+                    <li><i class="bi bi-check-circle text-success me-1"></i> Manage permissions</li>
+                </ul>
+
+                <h6 class="text-secondary mt-3">SemiAdmin Role</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="bi bi-check-circle text-success me-1"></i> View subscriptions</li>
+                    <li><i class="bi bi-check-circle text-success me-1"></i> View templates</li>
+                    <li><i class="bi bi-check-circle text-success me-1"></i> Limited reporting</li>
+                    <li><i class="bi bi-x-circle text-danger me-1"></i> Cannot modify data</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

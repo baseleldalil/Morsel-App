@@ -1,0 +1,286 @@
+<div class="message-composer">
+  <!-- Variables Bar -->
+  <div class="variables-bar">
+    <span class="variables-label">Variables:</span>
+    <button class="var-btn" (click)="insertVariable('arabicName')">👤 Arabic Name</button>
+    <button class="var-btn" (click)="insertVariable('englishName')">👤 English Name</button>
+    <button class="var-btn add-btn">➕</button>
+    <div class="emoji-section">
+      <button class="emoji-btn" (click)="toggleEmojiPicker()">😊 Emojis</button>
+    </div>
+  </div>
+
+  <!-- Emoji Picker -->
+  @if (showEmojiPicker) {
+    <div class="emoji-picker-container">
+      <div class="emoji-picker-header">
+        <span>Select Emoji</span>
+        <button class="close-picker" (click)="toggleEmojiPicker()">✕</button>
+      </div>
+      <div class="emoji-categories">
+        @for (category of emojiCategories; track category.name) {
+          <button
+            class="category-btn"
+            [class.active]="selectedCategory === category.name"
+            (click)="selectCategory(category.name)"
+          >
+            {{ category.icon }}
+          </button>
+        }
+      </div>
+      <div class="emoji-grid">
+        @for (emoji of getCurrentEmojis(); track emoji) {
+          <button class="emoji-item" (click)="insertEmoji(emoji)">{{ emoji }}</button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Template Info (shown when template is loaded) -->
+  @if (templateName()) {
+    <div class="template-info-bar">
+      <div class="template-info-content">
+        <div class="template-info-header">
+          <span class="template-info-icon">📋</span>
+          <span class="template-info-name">{{ templateName() }}</span>
+        </div>
+        @if (templateDescription()) {
+          <p class="template-info-description">{{ templateDescription() }}</p>
+        }
+      </div>
+      <button class="template-info-close" (click)="clearTemplateInfo()" title="Clear template info">✕</button>
+    </div>
+  }
+
+  <!-- Template Title & Description -->
+  <div class="template-title-section">
+    <input
+      type="text"
+      class="template-title-input"
+      placeholder="Enter template title..."
+      [value]="templateName()"
+      (input)="onTemplateTitleChange($any($event.target).value)"
+    />
+    <input
+      type="text"
+      class="template-description-input"
+      placeholder="Enter template description (optional)..."
+      [value]="templateDescription()"
+      (input)="onTemplateDescriptionChange($any($event.target).value)"
+    />
+  </div>
+
+  <!-- Male Message -->
+  <div class="message-box" [class.invalid]="maleMessage() && !maleValidation().isValid">
+    <div class="message-header male">
+      <span class="header-icon">♂</span>
+      <span>Male Message</span>
+      @if (maleMessage()) {
+        <span class="validation-badge" [class.valid]="maleValidation().isValid" [class.invalid]="!maleValidation().isValid">
+          {{ maleValidation().isValid ? '✓' : '!' }}
+        </span>
+      }
+    </div>
+    <div class="message-body">
+      <textarea
+        #maleTextarea
+        class="message-textarea"
+        [class.textarea-invalid]="maleMessage() && !maleValidation().isValid"
+        placeholder="...Type message for male contacts"
+        [value]="maleMessage()"
+        (input)="onMaleMessageChange($any($event.target).value)"
+        (focus)="onMaleTextareaFocus($event)"
+        (click)="saveCursorPosition('male')"
+        (keyup)="saveCursorPosition('male')"
+        [attr.maxlength]="maxLength"
+        dir="rtl"
+      ></textarea>
+      <div class="message-footer">
+        <span class="char-count">{{ maleMessageLength() }}/{{ maxLength }}</span>
+        @if (maleMessage()) {
+          <span class="placeholder-count" [class.valid]="maleValidation().emptyPlaceholderCount >= requiredOtherPlaceholders">
+            {{ '{' }}..{{ '}' }} {{ maleValidation().emptyPlaceholderCount }}/{{ requiredOtherPlaceholders }}
+          </span>
+          <span class="name-var-indicator" [class.valid]="maleValidation().hasArabicName || maleValidation().hasEnglishName">
+            @if (maleValidation().hasArabicName) {
+              <span>{{ '{' }}arabic_name{{ '}' }}</span>
+            }
+            @if (maleValidation().hasArabicName && maleValidation().hasEnglishName) {
+              <span> </span>
+            }
+            @if (maleValidation().hasEnglishName) {
+              <span>{{ '{' }}english_name{{ '}' }}</span>
+            }
+            @if (!maleValidation().hasArabicName && !maleValidation().hasEnglishName) {
+              <span>No name var</span>
+            }
+          </span>
+        }
+      </div>
+      @if (maleMessage() && !maleValidation().isValid) {
+        <div class="validation-errors">
+          @for (error of maleValidation().errors; track error) {
+            <span class="error-item">{{ error }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Female Message -->
+  <div class="message-box" [class.invalid]="femaleMessage() && !femaleValidation().isValid">
+    <div class="message-header female">
+      <span class="header-icon">♀</span>
+      <span>Female Message</span>
+      @if (femaleMessage()) {
+        <span class="validation-badge" [class.valid]="femaleValidation().isValid" [class.invalid]="!femaleValidation().isValid">
+          {{ femaleValidation().isValid ? '✓' : '!' }}
+        </span>
+      }
+    </div>
+    <div class="message-body">
+      <textarea
+        #femaleTextarea
+        class="message-textarea"
+        [class.textarea-invalid]="femaleMessage() && !femaleValidation().isValid"
+        placeholder="...Type message for female contacts"
+        [value]="femaleMessage()"
+        (input)="onFemaleMessageChange($any($event.target).value)"
+        (focus)="onFemaleTextareaFocus($event)"
+        (click)="saveCursorPosition('female')"
+        (keyup)="saveCursorPosition('female')"
+        [attr.maxlength]="maxLength"
+        dir="rtl"
+      ></textarea>
+      <div class="message-footer">
+        <span class="char-count">{{ femaleMessageLength() }}/{{ maxLength }}</span>
+        @if (femaleMessage()) {
+          <span class="placeholder-count" [class.valid]="femaleValidation().emptyPlaceholderCount >= requiredOtherPlaceholders">
+            {{ '{' }}..{{ '}' }} {{ femaleValidation().emptyPlaceholderCount }}/{{ requiredOtherPlaceholders }}
+          </span>
+          <span class="name-var-indicator" [class.valid]="femaleValidation().hasArabicName || femaleValidation().hasEnglishName">
+            @if (femaleValidation().hasArabicName) {
+              <span>{{ '{' }}arabic_name{{ '}' }}</span>
+            }
+            @if (femaleValidation().hasArabicName && femaleValidation().hasEnglishName) {
+              <span> </span>
+            }
+            @if (femaleValidation().hasEnglishName) {
+              <span>{{ '{' }}english_name{{ '}' }}</span>
+            }
+            @if (!femaleValidation().hasArabicName && !femaleValidation().hasEnglishName) {
+              <span>No name var</span>
+            }
+          </span>
+        }
+      </div>
+      @if (femaleMessage() && !femaleValidation().isValid) {
+        <div class="validation-errors">
+          @for (error of femaleValidation().errors; track error) {
+            <span class="error-item">{{ error }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Warning if both messages are the same -->
+  @if (messagesAreSame()) {
+    <div class="validation-errors" style="margin-top: 10px; padding: 10px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px;">
+      <span class="error-item" style="color: #92400e;">⚠️ Male and Female messages are identical. They must be different or use only one message field.</span>
+    </div>
+  }
+
+  <!-- Save as Template Button -->
+  <div class="save-template-wrapper">
+    @if (isEditing()) {
+      <button class="cancel-edit-btn" (click)="cancelEdit()">
+        <span>✕</span> Cancel
+      </button>
+    }
+    <button class="save-template-btn" (click)="saveAsTemplate()" [disabled]="isSavingTemplate()">
+      @if (isSavingTemplate()) {
+        <span class="btn-spinner"></span> Saving...
+      } @else if (isEditing()) {
+        <span>💾</span> Update Template
+      } @else {
+        <span>💾</span> Save as Template
+      }
+    </button>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="preview-section">
+    <div class="preview-header" (click)="togglePreview()">
+      <div class="preview-title">
+        <span class="preview-icon">👁</span>
+        <span>Live Preview</span>
+      </div>
+      <span class="expand-icon">{{ isPreviewExpanded ? '▲' : '▼' }}</span>
+    </div>
+
+    @if (isPreviewExpanded) {
+      <div class="preview-content">
+        <!-- Male Preview -->
+        <div class="preview-box">
+          <div class="preview-label">
+            <span>♂</span> Male Message Preview
+          </div>
+          <div class="preview-bubble">
+            <div class="bubble-content">
+              {{ malePreviewProcessed() }}
+            </div>
+            <span class="bubble-heart">❤️</span>
+          </div>
+        </div>
+
+        <!-- Female Preview -->
+        <div class="preview-box">
+          <div class="preview-label">
+            <span>♀</span> Female Message Preview
+          </div>
+          <div class="preview-bubble">
+            <div class="bubble-content">
+              {{ femalePreviewProcessed() }}
+            </div>
+            <span class="bubble-heart">❤️</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Attachments -->
+  <div class="attachments-section">
+    <div class="attachments-header">
+      <span class="attachments-icon">📎</span>
+      <span>Attachments</span>
+      <span class="attachments-percent">{{ attachments().length > 0 ? '100%' : '0%' }}</span>
+    </div>
+
+    <label class="choose-files-btn">
+      <input type="file" multiple hidden (change)="onFileSelect($event)" />
+      <span>⬆</span> Choose Files
+    </label>
+
+    @if (attachments().length === 0) {
+      <div class="no-files">
+        <span class="no-files-icon">📎</span>
+        <p>No files attached</p>
+      </div>
+    } @else {
+      <div class="files-list">
+        @for (file of attachments(); track file.id) {
+          <div class="file-item">
+            <span class="file-icon">📄</span>
+            <div class="file-info">
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">{{ formatFileSize(file.size) }}</span>
+            </div>
+            <button class="remove-file" (click)="removeAttachment(file.id)">✕</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

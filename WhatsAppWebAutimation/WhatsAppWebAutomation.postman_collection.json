@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "WhatsApp Web Automation API",
+		"description": "Send WhatsApp messages and attachments using Selenium WebDriver",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5036"
+		}
+	],
+	"item": [
+		{
+			"name": "Get Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/status",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Initialize Browser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/init",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Close Browser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/close",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"close"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Message - Text Only",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Hello! This is a test message.\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Message - With Custom Delay",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Hello with custom delay!\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 5,\n        \"maxDelaySeconds\": 10\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Message - With Image",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Check out this image!\",\n    \"attachments\": [\n        {\n            \"base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n            \"fileName\": \"image.png\",\n            \"mediaType\": \"image\",\n            \"caption\": \"A sample image\"\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Message - With Document",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"phone\": \"+1234567890\",\n    \"message\": \"Please find the document attached.\",\n    \"attachments\": [\n        {\n            \"base64\": \"SGVsbG8gV29ybGQh\",\n            \"fileName\": \"document.txt\",\n            \"mediaType\": \"document\"\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Bulk - Basic",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hello {{name}}! This is a personalized message.\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send-bulk",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send-bulk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Bulk - With Custom Settings",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        },\n        {\n            \"phone\": \"+1122334455\",\n            \"name\": \"Bob Wilson\"\n        }\n    ],\n    \"message\": \"Hi {{firstName}}! Hope you are doing well.\",\n    \"delaySettings\": {\n        \"minDelaySeconds\": 20,\n        \"maxDelaySeconds\": 40\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"breakAfterMessages\": 5,\n        \"minBreakMinutes\": 2,\n        \"maxBreakMinutes\": 5\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send-bulk",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send-bulk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Bulk - With Attachments",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"contacts\": [\n        {\n            \"phone\": \"+1234567890\",\n            \"name\": \"John Doe\"\n        },\n        {\n            \"phone\": \"+0987654321\",\n            \"name\": \"Jane Smith\"\n        }\n    ],\n    \"message\": \"Hi {{firstName}}! Here is the brochure.\",\n    \"attachments\": [\n        {\n            \"base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n            \"fileName\": \"brochure.png\",\n            \"mediaType\": \"image\",\n            \"caption\": \"Our latest brochure\"\n        }\n    ],\n    \"delaySettings\": {\n        \"minDelaySeconds\": 30,\n        \"maxDelaySeconds\": 60\n    },\n    \"breakSettings\": {\n        \"enabled\": true,\n        \"breakAfterMessages\": 10,\n        \"minBreakMinutes\": 5,\n        \"maxBreakMinutes\": 10\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/whatsapp/send-bulk",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"whatsapp",
+						"send-bulk"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

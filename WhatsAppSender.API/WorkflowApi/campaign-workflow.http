@@ -1,0 +1,182 @@
+### Campaign Workflow API Collection
+### Base URL and Variables
+@baseUrl = https://localhost:5001/api
+@apiKey = YOUR_API_KEY_HERE
+@campaignId = 1
+
+###############################################################################
+### CAMPAIGN WORKFLOW OPERATIONS
+###############################################################################
+
+### ========================================================================
+### 1. START CAMPAIGN
+### ========================================================================
+### Start a campaign with auto timing (uses database timing settings)
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "chrome"
+}
+
+### ========================================================================
+### 2. START CAMPAIGN - Manual Timing
+### ========================================================================
+### Start a campaign with manual timing settings (custom delays)
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "manual",
+  "manualTiming": {
+    "minDelay": 30,
+    "maxDelay": 60
+  },
+  "browserType": "chrome"
+}
+
+### ========================================================================
+### 3. START CAMPAIGN - Firefox Browser
+### ========================================================================
+### Start a campaign using Firefox browser instead of Chrome
+POST {{baseUrl}}/campaigns/{{campaignId}}/start
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "timingMode": "auto",
+  "browserType": "firefox"
+}
+
+### ========================================================================
+### 4. PAUSE CAMPAIGN
+### ========================================================================
+### Pause a running campaign
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 0
+}
+
+### ========================================================================
+### 5. PAUSE CAMPAIGN - Save Progress
+### ========================================================================
+### Pause a running campaign and save current progress
+POST {{baseUrl}}/campaigns/{{campaignId}}/pause
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 50
+}
+
+### ========================================================================
+### 6. STOP CAMPAIGN
+### ========================================================================
+### Stop a campaign completely (cannot be restarted)
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 0
+}
+
+### ========================================================================
+### 7. STOP CAMPAIGN - Save Final Progress
+### ========================================================================
+### Stop a campaign and save the final progress reached
+POST {{baseUrl}}/campaigns/{{campaignId}}/stop
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "currentProgress": 100
+}
+
+### ========================================================================
+### 8. FORCE CLOSE BROWSERS
+### ========================================================================
+### Emergency endpoint to forcefully close ALL Chrome browser sessions
+### Use this when stop campaign doesn't close Chrome properly
+POST {{baseUrl}}/campaigns/force-close-browsers
+X-API-Key: {{apiKey}}
+
+###############################################################################
+### CAMPAIGN PROGRESS & STATUS
+###############################################################################
+
+### ========================================================================
+### 9. GET CAMPAIGN PROGRESS
+### ========================================================================
+### Get detailed progress information for a campaign
+GET {{baseUrl}}/campaigns/{{campaignId}}/progress
+X-API-Key: {{apiKey}}
+
+### ========================================================================
+### 10. GET CAMPAIGN DETAILS
+### ========================================================================
+### Get full campaign details including status
+GET {{baseUrl}}/campaigns/{{campaignId}}
+X-API-Key: {{apiKey}}
+
+### ========================================================================
+### 11. LIST ALL CAMPAIGNS
+### ========================================================================
+### Get all campaigns for the authenticated user
+GET {{baseUrl}}/campaigns?page=1&pageSize=50
+X-API-Key: {{apiKey}}
+
+###############################################################################
+### CAMPAIGN MANAGEMENT
+###############################################################################
+
+### ========================================================================
+### 12. CREATE CAMPAIGN
+### ========================================================================
+### Create a new campaign
+POST {{baseUrl}}/campaigns
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "My Campaign",
+  "description": "Campaign description",
+  "campaignTemplateId": 1,
+  "messageContent": "Hello {Name}, this is a test message!",
+  "totalContacts": 100,
+  "useGenderTemplates": false,
+  "maleContent": "",
+  "femaleContent": ""
+}
+
+### ========================================================================
+### 13. CREATE CAMPAIGN - Gender Templates
+### ========================================================================
+### Create a campaign with gender-specific message templates
+POST {{baseUrl}}/campaigns
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "Gender Template Campaign",
+  "description": "Campaign with gender-specific messages",
+  "campaignTemplateId": 1,
+  "messageContent": "Hello {Name}!",
+  "totalContacts": 100,
+  "useGenderTemplates": true,
+  "maleContent": "Hello Mr. {Name}, welcome!",
+  "femaleContent": "Hello Ms. {Name}, welcome!"
+}
+
+### ========================================================================
+### 14. DELETE CAMPAIGN
+### ========================================================================
+### Delete a campaign (cannot delete running campaigns)
+DELETE {{baseUrl}}/campaigns/{{campaignId}}
+X-API-Key: {{apiKey}}
