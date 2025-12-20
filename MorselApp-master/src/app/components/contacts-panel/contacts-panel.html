@@ -85,17 +85,8 @@
         <span class="stat-value teal">{{ statistics().delivered }}</span>
       </div>
       <div class="stat-box clickable" (click)="resendAllFailed()" [class.disabled]="isResendingAllFailed() || statistics().failed === 0" title="Click to resend all failed contacts">
-        <span class="stat-label">Failed</span>
-        <span class="stat-value red">
-          @if (isResendingAllFailed()) {
-            <span class="mini-spinner"></span>
-          } @else {
-            {{ statistics().failed }}
-          }
-        </span>
-        @if (statistics().failed > 0) {
-          <span class="resend-hint">🔄 Click to resend</span>
-        }
+        <span class="stat-label">Failed {{ statistics().failed > 0 ? '🔄' : '' }}</span>
+        <span class="stat-value red">{{ statistics().failed }}</span>
       </div>
       <div class="stat-box">
         <span class="stat-label">Issues</span>
