@@ -234,27 +234,4 @@
     }
   </div>
 
-  <!-- Bottom Stats Bar -->
-  <div class="bottom-stats">
-    <div class="bottom-stat">
-      <span class="bottom-label">SELECTED CONTACTS</span>
-      <span class="bottom-value teal">{{ isRunning() || isPaused() ? progress().selectedContacts : selectedCount() }}</span>
-    </div>
-    <div class="bottom-stat">
-      <span class="bottom-label">SENT</span>
-      <span class="bottom-value green">{{ progress().sent }}</span>
-    </div>
-    <div class="bottom-stat">
-      <span class="bottom-label">IN PROGRESS</span>
-      <span class="bottom-value blue">{{ progress().inProgress }}</span>
-    </div>
-    <div class="bottom-stat">
-      <span class="bottom-label">FAILED</span>
-      <span class="bottom-value red">{{ progress().failed }}</span>
-    </div>
-    <div class="bottom-stat">
-      <span class="bottom-label">REMAINING</span>
-      <span class="bottom-value orange">{{ isRunning() || isPaused() ? progress().remaining : selectedCount() }}</span>
-    </div>
-  </div>
 </div>
