@@ -66,21 +66,21 @@
                 [value]="timing().messagesCountMin"
                 (input)="updateMessagesMin($any($event.target).valueAsNumber)"
                 min="1"
-                max="20"
+                max="35"
               />
               <span class="unit">msgs</span>
             </div>
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max Messages - Max 20</label>
+            <label>Max Messages - Max 35</label>
             <div class="input-with-unit">
               <input
                 type="number"
                 [value]="timing().messagesCountMax"
                 (input)="updateMessagesMax($any($event.target).valueAsNumber)"
                 min="1"
-                max="20"
+                max="35"
               />
               <span class="unit">msgs</span>
             </div>
@@ -117,7 +117,7 @@
 
         <div class="info-box">
           <span class="info-icon">ℹ</span>
-          Random pause after a number of messages (maximum 20 messages)
+          Random pause after a number of messages (maximum 35 messages)
         </div>
       </div>
 

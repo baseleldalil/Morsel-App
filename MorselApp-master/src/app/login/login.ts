@@ -17,6 +17,11 @@ export class Login {
   password: string = '';
   rememberMe: boolean = false;
   errorMessage: string = '';
+  showPassword: boolean = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   onSignIn() {
     if (!this.email || !this.password) {

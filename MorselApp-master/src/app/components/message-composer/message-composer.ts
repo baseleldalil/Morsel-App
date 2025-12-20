@@ -164,20 +164,20 @@ export class MessageComposerComponent {
   }
 
   // Sample preview messages
-  readonly sampleMalePreview = `السلام عليكم، نتمنى لكم رمضان كريم 🌙❤️
-دي فرصة حلوة اوي عشان نشكر كل
-دلوقتي شركة هايد بارك-Hyde park دازلة بـ مشروع جديد في التجمع السادس 🏠 المشروع ده هنعمل فلل و اراضي سكني و دي اول مرة هيتزلوا فيها بأراضي
-و دلوقتي هما بيجمعوا اشتراكات و ناريين بأسعار حلوة جداً`;
+  readonly sampleMalePreview = `Hello, we wish you a blessed season 🌙❤️
+This is a great opportunity to thank everyone
+Hyde Park company is launching a new project in the Sixth Settlement 🏠 This project will include villas and residential land
+They are now collecting subscriptions at very good prices`;
 
-  readonly sampleFemalePreview = `السلام عليكم، نتمنى لكِ رمضان كريم 🌙❤️
-دي فرصة حلوة اوي عشان نشكر كل
-دلوقتي شركة هايد بارك-Hyde park دازلة بـ مشروع جديد في التجمع السادس 🏠 المشروع ده هنعمل فلل و اراضي سكني و دي اول مرة هيتزلوا فيها بأراضي
-و دلوقتي هما بيجمعوا اشتراكات و ناريين بأسعار حلوة جداً`;
+  readonly sampleFemalePreview = `Hello, we wish you a blessed season 🌙❤️
+This is a great opportunity to thank everyone
+Hyde Park company is launching a new project in the Sixth Settlement 🏠 This project will include villas and residential land
+They are now collecting subscriptions at very good prices`;
 
   // Sample data for preview placeholders
   readonly samplePreviewData: Record<string, string> = {
-    'arabic_name': 'أحمد محمد',
-    'english_name': 'Ahmed Mohamed'
+    'arabic_name': 'John Doe',
+    'english_name': 'John Doe'
   };
 
   // Computed preview with placeholders replaced

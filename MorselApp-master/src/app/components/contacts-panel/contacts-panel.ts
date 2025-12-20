@@ -42,7 +42,7 @@ export class ContactsPanelComponent implements OnInit, OnDestroy {
   readonly filteredSelectedCount = this.contactsService.filteredSelectedCount;
 
   readonly filters: ContactFilter[] = [
-    'All', 'Pending', 'Sent', 'Delivered', 'Issues', 'Respond', 'NotInt', 'Failed'
+    'All', 'Pending', 'Delivered', 'Issues', 'Respond', 'NotInt', 'Failed'
   ];
 
   readonly filterLabels: Record<ContactFilter, string> = {

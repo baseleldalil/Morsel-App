@@ -55,7 +55,6 @@
 
   <!-- Action Buttons -->
   <div class="action-buttons">
-    <button class="btn btn-outline" (click)="clearContacts()">Clear</button>
     <button class="btn btn-outline" (click)="exportContacts()">Export</button>
     <button class="btn btn-primary" (click)="importContacts()" [disabled]="isImporting()">
       @if (isImporting()) {

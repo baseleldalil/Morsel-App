@@ -2,7 +2,7 @@
   <div class="login-card">
     <!-- Logo -->
     <div class="logo-section">
-      <h1 class="logo-text">مورسل</h1>
+      <h1 class="logo-text">Morsel</h1>
       <span class="logo-tagline">more sell</span>
     </div>
 
@@ -42,13 +42,18 @@
           <span class="label-icon">🔒</span>
           Password
         </label>
-        <input
-          type="password"
-          class="form-input"
-          placeholder="••••••••"
-          [(ngModel)]="password"
-          name="password"
-        />
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-input"
+            placeholder="••••••••"
+            [(ngModel)]="password"
+            name="password"
+          />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            {{ showPassword ? '👁' : '👁‍🗨' }}
+          </button>
+        </div>
       </div>
 
       <!-- Remember Me -->
