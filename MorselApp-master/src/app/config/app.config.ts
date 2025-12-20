@@ -39,7 +39,10 @@ export const AppConfig = {
       notInterested: '/Contacts', // POST /Contacts/{id}/not-interested
       responded: '/Contacts', // POST /Contacts/{id}/responded
       resend: '/Contacts', // POST /Contacts/{id}/resend
-      resendAllFailed: '/Contacts/resend-all-failed' // POST - resend all failed contacts
+      resendAllFailed: '/Contacts/resend-all-failed', // POST - resend all failed contacts
+      resendAllDelivered: '/Contacts/resend-all-delivered', // POST - resend all delivered contacts
+      resendAllResponded: '/Contacts/resend-all-responded', // POST - resend all responded contacts
+      resendAllNotInterested: '/Contacts/resend-all-not-interested' // POST - resend all not interested contacts
     },
     templates: {
       base: '/CampaignTemplates',           // GET (list), POST (create)

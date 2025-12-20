@@ -468,8 +468,11 @@ export class ContactsPanelComponent implements OnInit, OnDestroy {
   isDeleting = signal<boolean>(false);
   showDeleteConfirm = signal<boolean>(false);
 
-  // Resend all failed state
+  // Resend all state signals
   isResendingAllFailed = signal<boolean>(false);
+  isResendingAllDelivered = signal<boolean>(false);
+  isResendingAllResponded = signal<boolean>(false);
+  isResendingAllNotInterested = signal<boolean>(false);
 
   confirmBulkDelete(): void {
     const count = this.selectedCount();
@@ -531,6 +534,72 @@ export class ContactsPanelComponent implements OnInit, OnDestroy {
         const errorMessage = error.error?.error || error.error?.message || 'Failed to resend contacts';
         this.toastService.error(errorMessage);
         this.isResendingAllFailed.set(false);
+      }
+    });
+  }
+
+  // Resend all delivered contacts
+  resendAllDelivered(): void {
+    const deliveredCount = this.statistics().delivered;
+    if (deliveredCount === 0) {
+      this.toastService.warning('No delivered contacts to resend');
+      return;
+    }
+
+    this.isResendingAllDelivered.set(true);
+    this.contactsService.resendAllDelivered().subscribe({
+      next: (response) => {
+        this.toastService.success(`${response.resent_count} delivered contacts reset to Pending`);
+        this.isResendingAllDelivered.set(false);
+      },
+      error: (error) => {
+        const errorMessage = error.error?.error || error.error?.message || 'Failed to resend contacts';
+        this.toastService.error(errorMessage);
+        this.isResendingAllDelivered.set(false);
+      }
+    });
+  }
+
+  // Resend all responded contacts
+  resendAllResponded(): void {
+    const respondedCount = this.statistics().responded;
+    if (respondedCount === 0) {
+      this.toastService.warning('No responded contacts to resend');
+      return;
+    }
+
+    this.isResendingAllResponded.set(true);
+    this.contactsService.resendAllResponded().subscribe({
+      next: (response) => {
+        this.toastService.success(`${response.resent_count} responded contacts reset to Pending`);
+        this.isResendingAllResponded.set(false);
+      },
+      error: (error) => {
+        const errorMessage = error.error?.error || error.error?.message || 'Failed to resend contacts';
+        this.toastService.error(errorMessage);
+        this.isResendingAllResponded.set(false);
+      }
+    });
+  }
+
+  // Resend all not interested contacts
+  resendAllNotInterested(): void {
+    const notInterestedCount = this.statistics().notInterested;
+    if (notInterestedCount === 0) {
+      this.toastService.warning('No not interested contacts to resend');
+      return;
+    }
+
+    this.isResendingAllNotInterested.set(true);
+    this.contactsService.resendAllNotInterested().subscribe({
+      next: (response) => {
+        this.toastService.success(`${response.resent_count} not interested contacts reset to Pending`);
+        this.isResendingAllNotInterested.set(false);
+      },
+      error: (error) => {
+        const errorMessage = error.error?.error || error.error?.message || 'Failed to resend contacts';
+        this.toastService.error(errorMessage);
+        this.isResendingAllNotInterested.set(false);
       }
     });
   }

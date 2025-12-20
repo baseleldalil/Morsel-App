@@ -175,29 +175,35 @@ Hyde Park company is launching a new project in the Sixth Settlement 🏠 This p
 They are now collecting subscriptions at very good prices`;
 
   // Sample data for preview placeholders
-  readonly samplePreviewData: Record<string, string> = {
-    'arabic_name': 'John Doe',
-    'english_name': 'John Doe'
+  readonly sampleMalePreviewData: Record<string, string> = {
+    'arabic_name': 'باسل',
+    'english_name': 'Basel'
+  };
+
+  readonly sampleFemalePreviewData: Record<string, string> = {
+    'arabic_name': 'ساندرا',
+    'english_name': 'Sandra'
   };
 
   // Computed preview with placeholders replaced
   readonly malePreviewProcessed = computed(() => {
     const message = this.maleMessage();
-    return message ? this.processMessageForPreview(message) : this.sampleMalePreview;
+    return message ? this.processMessageForPreview(message, 'male') : this.sampleMalePreview;
   });
 
   readonly femalePreviewProcessed = computed(() => {
     const message = this.femaleMessage();
-    return message ? this.processMessageForPreview(message) : this.sampleFemalePreview;
+    return message ? this.processMessageForPreview(message, 'female') : this.sampleFemalePreview;
   });
 
   // Process message to replace placeholders with sample data
-  private processMessageForPreview(message: string): string {
+  private processMessageForPreview(message: string, gender: 'male' | 'female' = 'male'): string {
     let processed = message;
+    const previewData = gender === 'male' ? this.sampleMalePreviewData : this.sampleFemalePreviewData;
 
     // Replace known placeholders with sample data
-    processed = processed.replace(/\{arabic_name\}/g, this.samplePreviewData['arabic_name']);
-    processed = processed.replace(/\{english_name\}/g, this.samplePreviewData['english_name']);
+    processed = processed.replace(/\{arabic_name\}/g, previewData['arabic_name']);
+    processed = processed.replace(/\{english_name\}/g, previewData['english_name']);
 
     // Replace other placeholders like {option1-option2-option3} with the first option
     processed = processed.replace(/\{([^}]+)\}/g, (match, content) => {

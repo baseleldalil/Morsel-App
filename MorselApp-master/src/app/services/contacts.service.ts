@@ -146,7 +146,7 @@ export class ContactsService {
         sending: apiStats.sendingCount,
         sent: apiStats.sentCount,
         delivered: apiStats.deliveredCount,
-        failed: apiStats.failedCount,
+        failed: apiStats.failedCount + apiStats.sendingCount, // Include stuck (Sending) as Failed
         issues: apiStats.hasIssuesCount + apiStats.notValidCount,
         blocked: apiStats.blockedCount,
         responded: apiStats.respondedCount,
@@ -552,6 +552,72 @@ export class ContactsService {
       }),
       catchError(error => {
         console.error('Error resending all failed contacts:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Resend all delivered contacts (bulk reset to pending)
+  resendAllDelivered(): Observable<{ message: string; resent_count: number }> {
+    return this.http.post<{ message: string; resent_count: number }>(
+      `${this.API_URL}${AppConfig.api.contacts.resendAllDelivered}`,
+      {}
+    ).pipe(
+      tap((response) => {
+        // Update local state - change all Delivered contacts to Pending
+        this.allContactsSignal.update(contacts =>
+          contacts.map(c =>
+            c.status === 'Delivered' ? { ...c, status: 'Pending' as const } : c
+          )
+        );
+        this.fetchStatistics();
+      }),
+      catchError(error => {
+        console.error('Error resending all delivered contacts:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Resend all responded contacts (bulk reset to pending)
+  resendAllResponded(): Observable<{ message: string; resent_count: number }> {
+    return this.http.post<{ message: string; resent_count: number }>(
+      `${this.API_URL}${AppConfig.api.contacts.resendAllResponded}`,
+      {}
+    ).pipe(
+      tap((response) => {
+        // Update local state - change all Responded contacts to Pending
+        this.allContactsSignal.update(contacts =>
+          contacts.map(c =>
+            c.status === 'Responded' ? { ...c, status: 'Pending' as const } : c
+          )
+        );
+        this.fetchStatistics();
+      }),
+      catchError(error => {
+        console.error('Error resending all responded contacts:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Resend all not interested contacts (bulk reset to pending)
+  resendAllNotInterested(): Observable<{ message: string; resent_count: number }> {
+    return this.http.post<{ message: string; resent_count: number }>(
+      `${this.API_URL}${AppConfig.api.contacts.resendAllNotInterested}`,
+      {}
+    ).pipe(
+      tap((response) => {
+        // Update local state - change all NotInterested contacts to Pending
+        this.allContactsSignal.update(contacts =>
+          contacts.map(c =>
+            c.status === 'NotInterested' ? { ...c, status: 'Pending' as const } : c
+          )
+        );
+        this.fetchStatistics();
+      }),
+      catchError(error => {
+        console.error('Error resending all not interested contacts:', error);
         return throwError(() => error);
       })
     );

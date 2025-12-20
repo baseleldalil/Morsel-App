@@ -393,16 +393,42 @@
   position: relative;
 }
 
-.stat-box.clickable:hover:not(.disabled) {
+.stat-box.clickable.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Failed - Red hover */
+.stat-box.clickable.failed:hover:not(.disabled) {
   background: #fef2f2;
   border-color: #ef4444;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-.stat-box.clickable.disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+/* Delivered - Teal hover */
+.stat-box.clickable.delivered:hover:not(.disabled) {
+  background: #f0fdfa;
+  border-color: #14b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+/* Responded - Cyan hover */
+.stat-box.clickable.responded:hover:not(.disabled) {
+  background: #ecfeff;
+  border-color: #06b6d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+}
+
+/* Not Interested - Gray hover */
+.stat-box.clickable.not-interested:hover:not(.disabled) {
+  background: #f9fafb;
+  border-color: #6b7280;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
 }
 
 .resend-hint {

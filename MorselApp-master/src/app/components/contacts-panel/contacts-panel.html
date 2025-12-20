@@ -80,23 +80,23 @@
         <span class="stat-label">Pending</span>
         <span class="stat-value orange">{{ statistics().pending }}</span>
       </div>
-      <div class="stat-box">
+      <div class="stat-box clickable delivered" (click)="resendAllDelivered()" [class.disabled]="isResendingAllDelivered() || statistics().delivered === 0" title="Click to resend all delivered contacts">
         <span class="stat-label">Delivered</span>
         <span class="stat-value teal">{{ statistics().delivered }}</span>
       </div>
-      <div class="stat-box clickable" (click)="resendAllFailed()" [class.disabled]="isResendingAllFailed() || statistics().failed === 0" title="Click to resend all failed contacts">
-        <span class="stat-label">Failed {{ statistics().failed > 0 ? '🔄' : '' }}</span>
+      <div class="stat-box clickable failed" (click)="resendAllFailed()" [class.disabled]="isResendingAllFailed() || statistics().failed === 0" title="Click to resend all failed contacts">
+        <span class="stat-label">Failed</span>
         <span class="stat-value red">{{ statistics().failed }}</span>
       </div>
       <div class="stat-box">
         <span class="stat-label">Issues</span>
         <span class="stat-value purple">{{ statistics().issues }}</span>
       </div>
-      <div class="stat-box">
+      <div class="stat-box clickable responded" (click)="resendAllResponded()" [class.disabled]="isResendingAllResponded() || statistics().responded === 0" title="Click to resend all responded contacts">
         <span class="stat-label">Responded</span>
         <span class="stat-value cyan">{{ statistics().responded }}</span>
       </div>
-      <div class="stat-box">
+      <div class="stat-box clickable not-interested" (click)="resendAllNotInterested()" [class.disabled]="isResendingAllNotInterested() || statistics().notInterested === 0" title="Click to resend all not interested contacts">
         <span class="stat-label">Not Int.</span>
         <span class="stat-value gray">{{ statistics().notInterested }}</span>
       </div>
@@ -155,7 +155,6 @@
               }
             </div>
           </th>
-          <th>FIRST NAME</th>
           <th>ARABIC NAME</th>
           <th>ENGLISH NAME</th>
           <th>NUMBER</th>
@@ -175,24 +174,6 @@
                 (change)="toggleSelect(contact.id)"
                 [title]="contact.status !== 'Pending' ? 'Only Pending contacts can be selected' : 'Select for campaign'"
               />
-            </td>
-            <!-- First Name - Click to edit -->
-            <td class="editable-cell" (click)="startEdit(contact)">
-              @if (isEditing(contact.id)) {
-                <input
-                  type="text"
-                  class="edit-input"
-                  [value]="editForm().Name"
-                  (input)="updateEditField('Name', $any($event.target).value)"
-                  (keydown.enter)="saveEdit()"
-                  (keydown.escape)="cancelEdit()"
-                  (click)="$event.stopPropagation()"
-                  placeholder="First Name"
-                  autofocus
-                />
-              } @else {
-                <span class="cell-text">{{ contact.firstName }}</span>
-              }
             </td>
             <!-- Arabic Name - Click to edit -->
             <td class="editable-cell" (click)="startEdit(contact)">
