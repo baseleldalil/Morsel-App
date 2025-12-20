@@ -24,6 +24,7 @@
                 type="number"
                 [value]="timing().messageDelayMin"
                 (input)="updateDelayMin($any($event.target).valueAsNumber)"
+                (blur)="enforceDelayMin($any($event.target))"
                 min="30"
               />
               <span class="unit">sec</span>
@@ -37,6 +38,7 @@
                 type="number"
                 [value]="timing().messageDelayMax"
                 (input)="updateDelayMax($any($event.target).valueAsNumber)"
+                (blur)="enforceDelayMax($any($event.target))"
                 min="30"
               />
               <span class="unit">sec</span>

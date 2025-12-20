@@ -35,6 +35,22 @@ export class AdvancedTimingComponent {
     this.campaignService.updateTiming({ messageDelayMax: validValue });
   }
 
+  enforceDelayMin(input: HTMLInputElement): void {
+    const value = input.valueAsNumber;
+    if (!value || value < 30) {
+      input.value = '30';
+      this.campaignService.updateTiming({ messageDelayMin: 30 });
+    }
+  }
+
+  enforceDelayMax(input: HTMLInputElement): void {
+    const value = input.valueAsNumber;
+    if (!value || value < 30) {
+      input.value = '30';
+      this.campaignService.updateTiming({ messageDelayMax: 30 });
+    }
+  }
+
   updateMessagesMin(value: number): void {
     const validValue = Math.max(1, value || 1);
     this.campaignService.updateTiming({ messagesCountMin: validValue });
