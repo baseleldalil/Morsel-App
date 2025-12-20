@@ -172,7 +172,7 @@
       <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-item selected">
-          <span class="stat-icon">✓</span>
+          <span class="stat-icon">☑</span>
           <div class="stat-info">
             <span class="stat-value">{{ isRunning() || isPaused() ? progress().selectedContacts : selectedCount() }}</span>
             <span class="stat-label">SELECTED</span>
@@ -186,21 +186,21 @@
           </div>
         </div>
         <div class="stat-item delivered">
-          <span class="stat-icon">++</span>
+          <span class="stat-icon">✓✓</span>
           <div class="stat-info">
             <span class="stat-value">{{ progress().delivered }}</span>
             <span class="stat-label">DELIVERED</span>
           </div>
         </div>
         <div class="stat-item pending">
-          <span class="stat-icon">...</span>
+          <span class="stat-icon">◔</span>
           <div class="stat-info">
             <span class="stat-value">{{ progress().pending }}</span>
             <span class="stat-label">PENDING</span>
           </div>
         </div>
         <div class="stat-item failed">
-          <span class="stat-icon">X</span>
+          <span class="stat-icon">✕</span>
           <div class="stat-info">
             <span class="stat-value">{{ progress().failed }}</span>
             <span class="stat-label">FAILED</span>

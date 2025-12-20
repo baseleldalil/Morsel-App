@@ -536,8 +536,8 @@
 }
 
 .stat-item.selected .stat-icon {
-  background: #ccfbf1;
-  color: #20b2aa;
+  background: #ede9fe;
+  color: #7c3aed;
 }
 
 .stat-item.in-progress .stat-icon {
@@ -546,8 +546,8 @@
 }
 
 .stat-item.delivered .stat-icon {
-  background: #ccfbf1;
-  color: #0d9488;
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .stat-item.pending .stat-icon {
