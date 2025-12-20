@@ -56,11 +56,11 @@
         </div>
       </div>
 
-      <!-- Remember Me -->
+      <!-- Remember Password -->
       <div class="remember-section">
         <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
-          <span class="checkbox-text">Remember me</span>
+          <input type="checkbox" [(ngModel)]="rememberMe" (change)="onRememberMeChange()" name="rememberMe" />
+          <span class="checkbox-text">Remember Password</span>
         </label>
       </div>
 
