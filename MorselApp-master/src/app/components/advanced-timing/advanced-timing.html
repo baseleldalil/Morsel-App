@@ -97,6 +97,7 @@
                 type="number"
                 [value]="timing().breakDurationMin"
                 (input)="updateBreakMin($any($event.target).valueAsNumber)"
+                (blur)="enforceBreakMin($any($event.target))"
                 min="3"
               />
               <span class="unit">min</span>
@@ -104,13 +105,14 @@
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max Duration</label>
+            <label>Max Duration - Min 5</label>
             <div class="input-with-unit">
               <input
                 type="number"
                 [value]="timing().breakDurationMax"
                 (input)="updateBreakMax($any($event.target).valueAsNumber)"
-                min="3"
+                (blur)="enforceBreakMax($any($event.target))"
+                min="5"
               />
               <span class="unit">min</span>
             </div>

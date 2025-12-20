@@ -69,9 +69,25 @@ export class AdvancedTimingComponent {
   }
 
   updateBreakMax(value: number): void {
-    // Enforce minimum 3 minutes
-    const validValue = Math.max(3, value || 3);
+    // Enforce minimum 5 minutes
+    const validValue = Math.max(5, value || 5);
     this.campaignService.updateTiming({ breakDurationMax: validValue });
+  }
+
+  enforceBreakMin(input: HTMLInputElement): void {
+    const value = input.valueAsNumber;
+    if (!value || value < 3) {
+      input.value = '3';
+      this.campaignService.updateTiming({ breakDurationMin: 3 });
+    }
+  }
+
+  enforceBreakMax(input: HTMLInputElement): void {
+    const value = input.valueAsNumber;
+    if (!value || value < 5) {
+      input.value = '5';
+      this.campaignService.updateTiming({ breakDurationMax: 5 });
+    }
   }
 
   updatePrecision(value: number): void {
