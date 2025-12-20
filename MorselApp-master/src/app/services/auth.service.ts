@@ -115,8 +115,11 @@ export class AuthService {
 
   logout(): void {
     this.clearAllStorage();
-    localStorage.removeItem(this.STORAGE_KEYS.rememberMe);
+    // Don't clear remember password credentials - keep them for next login
+    // Only clear the session/auth data
     this.currentUser.set(null);
+    // Set flag so login page knows user just logged out
+    sessionStorage.setItem('just_logged_out', 'true');
     this.router.navigate(['/login']);
   }
 

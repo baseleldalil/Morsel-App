@@ -23,14 +23,18 @@ export class Login implements OnInit {
   showPassword: boolean = false;
 
   ngOnInit() {
-    // Check if user is already authenticated
-    if (this.authService.isAuthenticated()) {
+    // Load saved credentials if "Remember Password" was checked
+    this.loadSavedCredentials();
+
+    // Check if user is already authenticated (and not just logged out)
+    const justLoggedOut = sessionStorage.getItem('just_logged_out') === 'true';
+    if (this.authService.isAuthenticated() && !justLoggedOut) {
       this.router.navigate(['/home']);
       return;
     }
 
-    // Load saved credentials if "Remember Password" was checked
-    this.loadSavedCredentials();
+    // Clear the logout flag
+    sessionStorage.removeItem('just_logged_out');
   }
 
   private loadSavedCredentials(): void {
@@ -44,11 +48,7 @@ export class Login implements OnInit {
           const credentials = JSON.parse(atob(savedCredentials));
           this.email = credentials.email || '';
           this.password = credentials.password || '';
-
-          // Auto-login if credentials are available
-          if (this.email && this.password) {
-            this.onSignIn();
-          }
+          // Don't auto-login, just fill the fields
         } catch {
           // Invalid saved data, clear it
           this.clearSavedCredentials();
