@@ -30,8 +30,8 @@ export class AdvancedTimingComponent {
   }
 
   updateDelayMax(value: number): void {
-    // Enforce minimum 30 seconds
-    const validValue = Math.max(30, value || 30);
+    // Enforce minimum 60 seconds
+    const validValue = Math.max(60, value || 60);
     this.campaignService.updateTiming({ messageDelayMax: validValue });
   }
 
@@ -45,9 +45,9 @@ export class AdvancedTimingComponent {
 
   enforceDelayMax(input: HTMLInputElement): void {
     const value = input.valueAsNumber;
-    if (!value || value < 30) {
-      input.value = '30';
-      this.campaignService.updateTiming({ messageDelayMax: 30 });
+    if (!value || value < 60) {
+      input.value = '60';
+      this.campaignService.updateTiming({ messageDelayMax: 60 });
     }
   }
 

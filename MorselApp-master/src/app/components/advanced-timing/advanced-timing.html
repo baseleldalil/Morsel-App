@@ -32,14 +32,14 @@
           </div>
           <span class="range-arrow">↔</span>
           <div class="input-group">
-            <label>Max Delay</label>
+            <label>Max Delay - Min 60</label>
             <div class="input-with-unit">
               <input
                 type="number"
                 [value]="timing().messageDelayMax"
                 (input)="updateDelayMax($any($event.target).valueAsNumber)"
                 (blur)="enforceDelayMax($any($event.target))"
-                min="30"
+                min="60"
               />
               <span class="unit">sec</span>
             </div>
