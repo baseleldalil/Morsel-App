@@ -130,7 +130,7 @@
     <div class="progress-header">
       <h4>Campaign Progress</h4>
       <div class="progress-actions">
-        <span class="status-badge" [class]="status()">{{ status() }}</span>
+        <span class="status-badge" [class]="status()">{{ status() === 'idle' ? 'Done' : status() }}</span>
         @if (isRunning()) {
           <button class="action-btn pause" (click)="pauseCampaign()" title="Pause">||</button>
           <button class="action-btn stop" (click)="stopCampaign()" title="Stop">[ ]</button>
@@ -171,7 +171,7 @@
 
       <!-- Stats Grid - Enhanced In Progress -->
       <div class="stats-grid">
-        <div class="stat-item in-progress enhanced">
+        <div class="stat-item in-progress">
           <span class="stat-icon">▶</span>
           <div class="stat-info">
             <span class="stat-value">{{ progress().inProgress }}</span>

@@ -327,8 +327,8 @@
 }
 
 .status-badge.idle {
-  background: #f1f5f9;
-  color: #64748b;
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .status-badge.running {
@@ -505,9 +505,39 @@
   font-size: 14px;
 }
 
-.stat-item.sent .stat-icon {
-  background: #dcfce7;
-  color: #16a34a;
+/* Enhanced In Progress Stat */
+.stat-item.in-progress.enhanced {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
+  transform: scale(1.02);
+}
+
+.stat-item.in-progress.enhanced .stat-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  font-size: 18px;
+  animation: pulseProgress 2s infinite;
+}
+
+@keyframes pulseProgress {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  50% { transform: scale(1.1); box-shadow: 0 0 10px 5px rgba(59, 130, 246, 0.2); }
+}
+
+.stat-item.in-progress.enhanced .stat-value {
+  color: #1d4ed8;
+  font-size: 24px;
+}
+
+.stat-item.in-progress.enhanced .stat-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.stat-item.in-progress .stat-icon {
+  background: #dbeafe;
+  color: #3b82f6;
 }
 
 .stat-item.delivered .stat-icon {
@@ -569,7 +599,7 @@
 /* Bottom Stats Bar */
 .bottom-stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
 }
 
